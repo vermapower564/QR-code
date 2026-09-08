@@ -748,6 +748,7 @@ app.get('/dashboard', (req, res) => {
                 </div>
                 <nav class="space-y-2 font-medium text-sm">
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 bg-sky-600 text-white rounded-xl"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                    <a href="/dashboard/billing" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-credit-card"></i> Billing Module</a>
                     <a href="/p/john-doe" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 1: John Doe</a>
                 </nav>
             </div>
@@ -757,6 +758,7 @@ app.get('/dashboard', (req, res) => {
         <main class="flex-1 p-8 max-w-6xl">
             <div class="flex items-center justify-between mb-8">
                 <h1 class="text-2xl font-bold">Dashboard Overview</h1>
+                <a href="/dashboard/billing" class="px-4 py-2 bg-sky-600 text-white font-bold text-xs rounded-xl shadow">Billing Module &rarr;</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -778,6 +780,126 @@ app.get('/dashboard', (req, res) => {
                 </div>
             </div>
         </main>
+    </div>
+    `));
+});
+
+// Billing Module Routes
+app.get('/dashboard/billing', (req, res) => {
+    res.send(htmlWrapper('Billing Overview', `
+    <div class="min-h-screen bg-slate-50 p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Billing & Subscriptions</h1>
+                <p class="text-xs text-slate-500 mt-1">Manage active plan, payment methods, and invoices.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+                <a href="/dashboard/billing" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm">Overview</a>
+                <a href="/dashboard/billing/invoices" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Invoices</a>
+                <a href="/dashboard/billing/payment-methods" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Payment Methods</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase">Current Plan</span>
+                <h3 class="text-xl font-black text-slate-900 mt-1">Business & Teams</h3>
+                <p class="text-xs text-slate-500 mt-2">Renews Oct 01, 2026</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase">Amount Due</span>
+                <h3 class="text-3xl font-black text-slate-900 mt-1">$29.00 <span class="text-xs font-normal text-slate-500">USD</span></h3>
+                <p class="text-xs text-emerald-600 font-bold mt-2">Status: Paid</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase">Default Payment</span>
+                <h4 class="text-sm font-bold text-slate-900 mt-2">Visa •••• 4242</h4>
+                <a href="/dashboard/billing/payment-methods" class="text-xs font-bold text-sky-600 mt-1 block">Manage &rarr;</a>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase">Account Status</span>
+                <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">Active</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold">Recent Invoices</h2>
+                <a href="/dashboard/billing/invoices" class="text-xs font-bold text-sky-600">View All Invoices &rarr;</a>
+            </div>
+            <table class="w-full text-left text-sm">
+                <thead><tr class="text-xs text-slate-400 uppercase border-b"><th class="pb-2">Invoice #</th><th>Date</th><th>Amount</th><th>Status</th><th class="text-right">Action</th></tr></thead>
+                <tbody class="divide-y text-xs font-semibold">
+                    <tr><td class="py-3 font-mono font-bold">INV-2026-0001</td><td>Sep 01, 2026</td><td>$29.00 USD</td><td><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">Completed</span></td><td class="text-right"><a href="/dashboard/billing/invoices/1/download" class="px-3 py-1 bg-slate-100 rounded text-slate-700 font-bold">Download</a></td></tr>
+                    <tr><td class="py-3 font-mono font-bold">INV-2026-0002</td><td>Aug 01, 2026</td><td>$29.00 USD</td><td><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">Completed</span></td><td class="text-right"><a href="/dashboard/billing/invoices/1/download" class="px-3 py-1 bg-slate-100 rounded text-slate-700 font-bold">Download</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    `));
+});
+
+app.get('/dashboard/billing/invoices', (req, res) => {
+    res.send(htmlWrapper('Invoices', `
+    <div class="min-h-screen bg-slate-50 p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Invoice History</h1>
+                <p class="text-xs text-slate-500 mt-1">Search, filter, view details, and download official billing invoices.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+                <a href="/dashboard/billing" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview</a>
+                <a href="/dashboard/billing/invoices" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm">Invoices</a>
+                <a href="/dashboard/billing/payment-methods" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Payment Methods</a>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <table class="w-full text-left text-sm">
+                <thead><tr class="text-xs text-slate-400 uppercase border-b"><th class="pb-3">Invoice #</th><th>Date</th><th>Billing Period</th><th>Amount</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+                <tbody class="divide-y text-xs font-semibold">
+                    <tr><td class="py-4 font-mono font-bold text-slate-900">INV-2026-0001</td><td>Sep 01, 2026</td><td>Sep 01 - Sep 30, 2026</td><td>$29.00 USD</td><td><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold uppercase">Paid</span></td><td class="text-right"><a href="/dashboard/billing/invoices/1/download" class="px-3 py-1.5 bg-sky-600 text-white rounded font-bold">Download PDF</a></td></tr>
+                    <tr><td class="py-4 font-mono font-bold text-slate-900">INV-2026-0002</td><td>Aug 01, 2026</td><td>Aug 01 - Aug 31, 2026</td><td>$29.00 USD</td><td><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold uppercase">Paid</span></td><td class="text-right"><a href="/dashboard/billing/invoices/1/download" class="px-3 py-1.5 bg-sky-600 text-white rounded font-bold">Download PDF</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    `));
+});
+
+app.get('/dashboard/billing/invoices/:id/download', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="Invoice-INV-2026-0001.txt"');
+    res.send("INVOICE SUMMARY\n==============================\nInvoice #: INV-2026-0001\nAmount Paid: $29.00 USD\nStatus: Paid\nPayment Method: Visa •••• 4242\n==============================\nThank you for using QR Identity SaaS.");
+});
+
+app.get('/dashboard/billing/payment-methods', (req, res) => {
+    res.send(htmlWrapper('Payment Methods', `
+    <div class="min-h-screen bg-slate-50 p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Payment Methods</h1>
+                <p class="text-xs text-slate-500 mt-1">Manage saved credit cards, default payment options, and billing authorization.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+                <a href="/dashboard/billing" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview</a>
+                <a href="/dashboard/billing/invoices" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Invoices</a>
+                <a href="/dashboard/billing/payment-methods" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm">Payment Methods</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative">
+                <span class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold uppercase">Default Card</span>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-9 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-sm"><i class="fa-brands fa-cc-visa text-lg"></i></div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Visa •••• 4242</h3>
+                        <p class="text-xs text-slate-500">Expires 12/2028</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     `));
 });

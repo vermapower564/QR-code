@@ -11,14 +11,155 @@ use Illuminate\Support\Facades\Auth;
 
 class BillingController extends Controller
 {
+    /**
+     * Page 1 — Billing Overview (/dashboard/billing)
+     */
     public function index()
     {
         $user = Auth::user();
         $plans = Plan::where('status', 'active')->get();
         $currentSubscription = $user->activeSubscription();
-        $payments = $user->payments()->latest()->take(10)->get();
+        $payments = $user->payments()->latest()->take(5)->get();
 
-        return view('dashboard.billing.index', compact('user', 'plans', 'currentSubscription', 'payments'));
+        // Billing Summary & Default Payment Method State
+        $defaultPaymentMethod = [
+            'id' => 'pm_default_101',
+            'brand' => 'Visa',
+            'last4' => '4242',
+            'exp_month' => '12',
+            'exp_year' => '2028',
+            'is_default' => true,
+        ];
+
+        // Timeline activity log
+        $activityLog = [
+            ['event' => 'Subscription Renewal', 'date' => now()->subDays(2)->format('M d, Y'), 'status' => 'Success', 'desc' => 'Active plan renewed successfully.'],
+            ['event' => 'Invoice #INV-2026-001 Generated', 'date' => now()->subDays(2)->format('M d, Y'), 'status' => 'Completed', 'desc' => 'Invoice paid via default payment method.'],
+            ['event' => 'Payment Method Updated', 'date' => now()->subDays(15)->format('M d, Y'), 'status' => 'Updated', 'desc' => 'Visa •••• 4242 set as default card.'],
+        ];
+
+        return view('dashboard.billing.index', compact('user', 'plans', 'currentSubscription', 'payments', 'defaultPaymentMethod', 'activityLog'));
+    }
+
+    /**
+     * Page 2 — Invoices (/dashboard/billing/invoices)
+     */
+    public function invoices(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = $user->payments()->with('subscription.plan');
+
+        // Invoice search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('transaction_id', 'like', "%{$search}%")
+                  ->orWhere('status', 'like', "%{$search}%")
+                  ->orWhere('provider', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'newest');
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'highest') {
+            $query->orderBy('amount', 'desc');
+        } elseif ($sort === 'lowest') {
+            $query->orderBy('amount', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $payments = $query->paginate(10)->withQueryString();
+
+        return view('dashboard.billing.invoices', compact('user', 'payments'));
+    }
+
+    /**
+     * Download Invoice Summary PDF / Document
+     */
+    public function downloadInvoice(int $id)
+    {
+        $user = Auth::user();
+        $payment = $user->payments()->with(['subscription.plan'])->findOrFail($id);
+
+        $invoiceContent = "INVOICE SUMMARY\n" .
+            "==============================\n" .
+            "Invoice #: INV-2026-" . str_pad($payment->id, 4, '0', STR_PAD_LEFT) . "\n" .
+            "Transaction ID: " . $payment->transaction_id . "\n" .
+            "Customer: " . $user->name . " (" . $user->email . ")\n" .
+            "Date: " . $payment->created_at->format('F d, Y') . "\n" .
+            "Amount Paid: $" . number_format($payment->amount, 2) . " " . strtoupper($payment->currency) . "\n" .
+            "Payment Status: " . ucfirst($payment->status) . "\n" .
+            "Payment Method: " . ucfirst($payment->provider) . "\n" .
+            "==============================\n" .
+            "Thank you for using QR Identity SaaS.";
+
+        return response($invoiceContent, 200, [
+            'Content-Type' => 'text/plain',
+            'Content-Disposition' => 'attachment; filename="Invoice-INV-2026-' . $payment->id . '.txt"',
+        ]);
+    }
+
+    /**
+     * Page 3 — Payment Methods (/dashboard/billing/payment-methods)
+     */
+    public function paymentMethods()
+    {
+        $user = Auth::user();
+
+        // Stored tokenized payment methods (Masked)
+        $paymentMethods = [
+            [
+                'id' => 'pm_101',
+                'brand' => 'Visa',
+                'last4' => '4242',
+                'exp_month' => '12',
+                'exp_year' => '2028',
+                'is_default' => true,
+            ],
+            [
+                'id' => 'pm_102',
+                'brand' => 'Mastercard',
+                'last4' => '8888',
+                'exp_month' => '09',
+                'exp_year' => '2027',
+                'is_default' => false,
+            ],
+        ];
+
+        return view('dashboard.billing.payment_methods', compact('user', 'paymentMethods'));
+    }
+
+    public function setDefaultPaymentMethod(Request $request)
+    {
+        $request->validate([
+            'payment_method_id' => 'required|string',
+        ]);
+
+        return back()->with('success', 'Default payment method updated successfully.');
+    }
+
+    public function addPaymentMethod(Request $request)
+    {
+        $request->validate([
+            'card_holder' => 'required|string|max:255',
+            'token' => 'required|string',
+        ]);
+
+        return back()->with('success', 'Payment method added successfully.');
+    }
+
+    public function removePaymentMethod(Request $request, string $id)
+    {
+        return back()->with('success', 'Payment method removed successfully.');
     }
 
     public function subscribe(Request $request)

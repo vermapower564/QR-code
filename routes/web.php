@@ -112,9 +112,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/profiles/{id}/custom-links', [ProfileController::class, 'addCustomLink']);
     Route::delete('/profiles/{profile}/custom-links/{link}', [ProfileController::class, 'deleteCustomLink'])->name('profiles.custom.delete');
 
-    // Billing & Subscriptions
+    // Billing & Subscriptions Module
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::get('/billing/plans', [BillingController::class, 'index'])->name('billing.plans');
+    Route::get('/billing/invoices', [BillingController::class, 'invoices'])->name('billing.invoices');
+    Route::get('/billing/invoices/{id}/download', [BillingController::class, 'downloadInvoice'])->name('billing.invoices.download');
+    Route::get('/billing/payment-methods', [BillingController::class, 'paymentMethods'])->name('billing.payment-methods');
+    Route::post('/billing/payment-methods/default', [BillingController::class, 'setDefaultPaymentMethod'])->name('billing.payment-methods.default');
+    Route::post('/billing/payment-methods/add', [BillingController::class, 'addPaymentMethod'])->name('billing.payment-methods.add');
+    Route::delete('/billing/payment-methods/{id}', [BillingController::class, 'removePaymentMethod'])->name('billing.payment-methods.remove');
     Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::post('/billing/upgrade', [BillingController::class, 'subscribe'])->name('billing.upgrade');
     Route::post('/billing/downgrade', [BillingController::class, 'subscribe'])->name('billing.downgrade');
