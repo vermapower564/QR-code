@@ -718,12 +718,13 @@ app.get('/p/:slug', (req, res) => {
 </html>`);
 });
 
-// Contact Card (.vcf Download)
+// Contact Card (.vcf Download & Visual Page)
 app.get('/p/:slug/contact', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
     if (!profile) return res.status(404).send("Not Found");
 
-    const vcf = `BEGIN:VCARD
+    if (req.query.download === '1') {
+        const vcf = `BEGIN:VCARD
 VERSION:3.0
 FN:${profile.name}
 ORG:${profile.company}
@@ -734,10 +735,41 @@ URL:${profile.website}
 NOTE:${profile.bio}
 END:VCARD`;
 
-    res.setHeader('Content-Type', 'text/vcard');
-    res.setHeader('Content-Disposition', `attachment; filename="${profile.slug}.vcf"`);
-    res.send(vcf);
+        res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${profile.slug}.vcf"`);
+        return res.send(vcf);
+    }
+
+    res.send(htmlWrapper(`Save Contact - ${profile.name}`, `
+    <div class="min-h-[75vh] bg-slate-50 flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center space-y-6">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-md">
+                ${profile.name.charAt(0)}
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-black text-slate-900">${profile.name}</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-1">${profile.designation} • ${profile.company}</p>
+                <p class="text-xs text-slate-400 mt-0.5">Click below to download contact card (.vcf)</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left font-mono text-xs space-y-1 text-slate-700">
+                <p><span class="font-bold text-slate-400">FN:</span> ${profile.name}</p>
+                <p><span class="font-bold text-slate-400">TEL:</span> ${profile.phone}</p>
+                <p><span class="font-bold text-slate-400">EMAIL:</span> ${profile.email}</p>
+                <p><span class="font-bold text-slate-400">URL:</span> ${profile.website}</p>
+            </div>
+
+            <a href="/p/${profile.slug}/contact?download=1" class="w-full py-4 bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> Download VCard (.vcf)
+            </a>
+
+            <a href="/p/${profile.slug}" class="block text-xs font-bold text-slate-500 hover:text-slate-900">&larr; Return to Public Profile</a>
+        </div>
+    </div>
+    `));
 });
+
 
 // Dashboard (/dashboard)
 app.get('/dashboard', (req, res) => {

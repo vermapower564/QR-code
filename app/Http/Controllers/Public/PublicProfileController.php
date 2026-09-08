@@ -127,14 +127,19 @@ class PublicProfileController extends Controller
             \Illuminate\Support\Facades\Log::error("Analytics error on contact download: " . $e->getMessage());
         }
 
-        $vcardContent = $this->contactCardService->generateVCard($profile);
-        $fileName = str_replace(' ', '_', strtolower($profile->name)) . '.vcf';
+        if ($request->has('download') || $request->wantsJson()) {
+            $vcardContent = $this->contactCardService->generateVCard($profile);
+            $fileName = str_replace(' ', '_', strtolower($profile->name)) . '.vcf';
 
-        return response($vcardContent, 200, [
-            'Content-Type' => 'text/vcard; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-        ]);
+            return response($vcardContent, 200, [
+                'Content-Type' => 'text/vcard; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            ]);
+        }
+
+        return view('profile.contact', compact('profile'));
     }
+
 
     public function trackClick(int $profileId, int $linkId, Request $request)
     {
