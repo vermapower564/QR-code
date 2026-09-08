@@ -9,10 +9,14 @@ use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\QRCodeController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
 use App\Http\Controllers\Dashboard\BillingController;
+use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminPlanController;
 use App\Http\Controllers\Admin\AdminTemplateController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +77,11 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     // Billing & Subscriptions
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
+
+    // Account Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
 });
 
 /*
@@ -88,6 +97,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
     Route::post('/users/{id}/plan', [AdminUserController::class, 'updatePlan'])->name('users.plan');
 
+    // Profiles Moderation
+    Route::get('/profiles', [AdminProfileController::class, 'index'])->name('profiles.index');
+    Route::post('/profiles/{id}/toggle', [AdminProfileController::class, 'toggleStatus'])->name('profiles.toggle');
+
     // Plans
     Route::get('/plans', [AdminPlanController::class, 'index'])->name('plans.index');
     Route::post('/plans', [AdminPlanController::class, 'store'])->name('plans.store');
@@ -95,4 +108,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Templates
     Route::get('/templates', [AdminTemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [AdminTemplateController::class, 'store'])->name('templates.store');
+
+    // Payments
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+
+    // Global Settings
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
 });
