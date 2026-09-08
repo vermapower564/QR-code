@@ -36,17 +36,25 @@ class RegisterController extends Controller
         }
 
         // 2. Validate and Normalize Website / URL Link
-        if ($request->filled('website')) {
-            $trimmedWebsite = trim($request->website);
-            $linkValidator = app(\App\Services\LinkValidationService::class);
-
-            if (!$linkValidator->isValidUrl($trimmedWebsite)) {
-                throw ValidationException::withMessages([
-                    'website' => ['Please enter a valid website URL.'],
-                ]);
-            }
-            $request->merge(['website' => $trimmedWebsite]);
+        $trimmedWebsite = trim((string) $request->input('website', ''));
+        if (empty($trimmedWebsite)) {
+            throw ValidationException::withMessages([
+                'website' => ['Please enter a valid website URL.'],
+            ]);
         }
+
+        // Auto-prepend https:// if scheme is missing (e.g. example.com -> https://example.com)
+        if (!preg_match('~^https?://~i', $trimmedWebsite)) {
+            $trimmedWebsite = 'https://' . $trimmedWebsite;
+        }
+
+        $linkValidator = app(\App\Services\LinkValidationService::class);
+        if (!$linkValidator->isValidUrl($trimmedWebsite)) {
+            throw ValidationException::withMessages([
+                'website' => ['Please enter a valid website URL.'],
+            ]);
+        }
+        $request->merge(['website' => $trimmedWebsite]);
 
         $messages = [
             'name.required' => 'Full name is required.',
@@ -55,6 +63,7 @@ class RegisterController extends Controller
             'email.unique' => 'An account with this email already exists.',
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Passwords do not match.',
+            'website.required' => 'Please enter a valid website URL.',
             'website.url' => 'Please enter a valid website URL.',
         ];
 
