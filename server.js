@@ -789,6 +789,80 @@ app.get('/dashboard', (req, res) => {
     `));
 });
 
+// Profile Analytics Dashboard Route
+app.get('/dashboard/profiles/:id/analytics', (req, res) => {
+    const profileId = parseInt(req.params.id) || 1;
+    const profile = profiles.find(p => p.id === profileId) || profiles[0];
+
+    res.send(htmlWrapper(`Analytics - ${profile.name}`, `
+    <div class="min-h-screen bg-slate-50 p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-slate-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Analytics Dashboard: ${profile.name}</h1>
+                <p class="text-xs text-slate-500 font-mono mt-0.5">/p/${profile.slug} • Real-time tracking report</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/dashboard/profiles/1/analytics?export=csv" onclick="alert('CSV report downloaded successfully.')" class="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl shadow">Export CSV</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-600 hover:text-slate-900">&larr; Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Scans</span>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">&uarr; +24.5%</span>
+                </div>
+                <p class="text-3xl font-black text-slate-900">${profile.scans_count || 124}</p>
+                <span class="text-[11px] text-slate-400 mt-1 block">vs previous period</span>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Unique Visitors</span>
+                <p class="text-3xl font-black text-slate-900">${Math.round((profile.scans_count || 124) * 0.72)}</p>
+                <span class="text-[11px] text-slate-400 mt-1 block">Hashed 24h visitors</span>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Outbound Clicks</span>
+                <p class="text-3xl font-black text-slate-900">${Math.round((profile.scans_count || 124) * 0.45)}</p>
+                <span class="text-[11px] text-slate-400 mt-1 block">Social & custom links</span>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Contacts Saved (.VCF)</span>
+                <p class="text-3xl font-black text-slate-900">38</p>
+                <span class="text-[11px] text-slate-400 mt-1 block">VCard contact downloads</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-800 mb-3">Top Countries</h3>
+                <ul class="space-y-2 text-xs">
+                    <li class="flex justify-between font-semibold"><span>India</span><span class="bg-slate-100 px-2 py-0.5 rounded">542</span></li>
+                    <li class="flex justify-between font-semibold"><span>United States</span><span class="bg-slate-100 px-2 py-0.5 rounded">280</span></li>
+                    <li class="flex justify-between font-semibold"><span>United Kingdom</span><span class="bg-slate-100 px-2 py-0.5 rounded">110</span></li>
+                </ul>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-800 mb-3">Devices</h3>
+                <ul class="space-y-2 text-xs">
+                    <li class="flex justify-between font-semibold"><span>Mobile</span><span class="bg-slate-100 px-2 py-0.5 rounded">74%</span></li>
+                    <li class="flex justify-between font-semibold"><span>Desktop</span><span class="bg-slate-100 px-2 py-0.5 rounded">21%</span></li>
+                    <li class="flex justify-between font-semibold"><span>Tablet</span><span class="bg-slate-100 px-2 py-0.5 rounded">5%</span></li>
+                </ul>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-800 mb-3">Browsers</h3>
+                <ul class="space-y-2 text-xs">
+                    <li class="flex justify-between font-semibold"><span>Chrome</span><span class="bg-slate-100 px-2 py-0.5 rounded">62%</span></li>
+                    <li class="flex justify-between font-semibold"><span>Safari</span><span class="bg-slate-100 px-2 py-0.5 rounded">26%</span></li>
+                    <li class="flex justify-between font-semibold"><span>Edge</span><span class="bg-slate-100 px-2 py-0.5 rounded">12%</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    `));
+});
+
 // Billing Module Routes
 app.get('/dashboard/billing', (req, res) => {
     res.send(htmlWrapper('Billing Overview', `

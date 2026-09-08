@@ -121,14 +121,16 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/billing/invoices', [BillingController::class, 'invoices'])->name('billing.invoices');
     Route::get('/billing/invoices/{id}/download', [BillingController::class, 'downloadInvoice'])->name('billing.invoices.download');
     Route::get('/billing/payment-methods', [BillingController::class, 'paymentMethods'])->name('billing.payment-methods');
+    Route::get('/billing/payment-method', [BillingController::class, 'paymentMethods']);
+    Route::get('/billing/history', [BillingController::class, 'invoices'])->name('billing.history');
     Route::post('/billing/payment-methods/default', [BillingController::class, 'setDefaultPaymentMethod'])->name('billing.payment-methods.default');
     Route::post('/billing/payment-methods/add', [BillingController::class, 'addPaymentMethod'])->name('billing.payment-methods.add');
     Route::delete('/billing/payment-methods/{id}', [BillingController::class, 'removePaymentMethod'])->name('billing.payment-methods.remove');
     Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::post('/billing/upgrade', [BillingController::class, 'subscribe'])->name('billing.upgrade');
     Route::post('/billing/downgrade', [BillingController::class, 'subscribe'])->name('billing.downgrade');
-    Route::post('/billing/cancel', [BillingController::class, 'subscribe'])->name('billing.cancel');
-    Route::post('/billing/renew', [BillingController::class, 'subscribe'])->name('billing.renew');
+    Route::post('/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
+    Route::post('/billing/renew', [BillingController::class, 'renew'])->name('billing.renew');
 
     // Account Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

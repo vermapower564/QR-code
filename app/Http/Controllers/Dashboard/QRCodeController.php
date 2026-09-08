@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\QRProfile;
 use App\Services\QRCodeService;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\Storage;
 class QRCodeController extends Controller
 {
     public function __construct(
-        protected QRCodeService $qrCodeService
+        protected QRCodeService $qrCodeService,
+        protected FeatureService $featureService
     ) {}
 
     public function show(int $id)
@@ -31,6 +33,10 @@ class QRCodeController extends Controller
     {
         $profile = Auth::user()->qrProfiles()->findOrFail($id);
 
+        if (!$this->featureService->canUseCustomQR(Auth::user())) {
+            return back()->with('error', 'Custom QR code styling is a premium feature. Upgrade your plan to customize QR colors and styles.');
+        }
+
         $request->validate([
             'foreground_color' => ['required', 'string', 'regex:/^#[a-fA-F0-9]{6}$/'],
             'background_color' => ['required', 'string', 'regex:/^#[a-fA-F0-9]{6}$/'],
@@ -40,6 +46,9 @@ class QRCodeController extends Controller
 
         $logoPath = $profile->qrCode ? $profile->qrCode->logo_path : null;
         if ($request->hasFile('logo')) {
+            if (!$this->featureService->canUseFeature(Auth::user(), 'qr_logo')) {
+                return back()->with('error', 'QR Code Logo embedding requires a Pro or Business plan.');
+            }
             $logoPath = $request->file('logo')->store('qr-logos', 'public');
         }
 

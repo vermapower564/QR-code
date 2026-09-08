@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\QRProfile;
 use App\Services\AnalyticsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,19 +17,19 @@ class TrackAnalytics implements ShouldQueue
 
     public int $tries = 3;
     public int $profileId;
-    public string $ipAddress;
-    public ?string $userAgent;
-    public ?string $referrer;
+    public string $eventType;
+    public int $linkId;
+    public array $requestData;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(int $profileId, string $ipAddress, ?string $userAgent = null, ?string $referrer = null)
+    public function __construct(int $profileId, string $eventType = 'qr_scan', int $linkId = 0, array $requestData = [])
     {
         $this->profileId = $profileId;
-        $this->ipAddress = $ipAddress;
-        $this->userAgent = $userAgent;
-        $this->referrer = $referrer;
+        $this->eventType = $eventType;
+        $this->linkId = $linkId;
+        $this->requestData = $requestData;
     }
 
     /**
@@ -36,12 +37,39 @@ class TrackAnalytics implements ShouldQueue
      */
     public function handle(AnalyticsService $analyticsService): void
     {
-        Log::info("TrackAnalytics Job: Logging scan for profile ID {$this->profileId}.");
-        $analyticsService->recordScan($this->profileId, $this->ipAddress, $this->userAgent, $this->referrer);
+        try {
+            $profile = QRProfile::find($this->profileId);
+            if (!$profile) {
+                return;
+            }
+
+            // Create synthetic request wrapper
+            $request = new \Illuminate\Http\Request();
+            if (isset($this->requestData['ip'])) {
+                $request->server->set('REMOTE_ADDR', $this->requestData['ip']);
+            }
+            if (isset($this->requestData['user_agent'])) {
+                $request->headers->set('User-Agent', $this->requestData['user_agent']);
+            }
+            if (isset($this->requestData['referer'])) {
+                $request->headers->set('Referer', $this->requestData['referer']);
+            }
+            if (isset($this->requestData['country'])) {
+                $request->headers->set('cf-ipcountry', $this->requestData['country']);
+            }
+
+            if ($this->eventType === 'qr_scan') {
+                $analyticsService->recordScan($profile, $request);
+            } else {
+                $analyticsService->recordClick($profile, $this->linkId, $request, $this->eventType);
+            }
+        } catch (\Throwable $e) {
+            Log::error("TrackAnalytics Job failed for profile ID {$this->profileId}: " . $e->getMessage());
+        }
     }
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("TrackAnalytics Job failed for profile ID {$this->profileId}: " . $exception->getMessage());
+        Log::error("TrackAnalytics Job failed permanently for profile ID {$this->profileId}: " . $exception->getMessage());
     }
 }

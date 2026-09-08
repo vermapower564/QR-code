@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
+use App\Models\PlanFeature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AdminPlanController extends Controller
 {
@@ -26,7 +28,7 @@ class AdminPlanController extends Controller
             'link_limit' => 'required|integer',
         ]);
 
-        Plan::create([
+        $plan = Plan::create([
             'name' => $request->name,
             'slug' => strtolower($request->slug),
             'price' => $request->price,
@@ -37,6 +39,47 @@ class AdminPlanController extends Controller
             'status' => 'active',
         ]);
 
+        // Create default feature flags
+        $defaultFeatures = [
+            'custom_qr' => $request->price > 0 ? 'true' : 'false',
+            'qr_logo' => $request->price > 0 ? 'true' : 'false',
+            'advanced_analytics' => $request->price > 0 ? 'true' : 'false',
+            'remove_branding' => $request->price > 0 ? 'true' : 'false',
+            'custom_links' => 'true',
+            'contact_card' => 'true',
+        ];
+
+        foreach ($defaultFeatures as $key => $val) {
+            PlanFeature::create([
+                'plan_id' => $plan->id,
+                'feature_key' => $key,
+                'feature_value' => $val,
+            ]);
+        }
+
         return back()->with('success', 'Plan created successfully.');
+    }
+
+    public function updateFeatures(Request $request, int $planId)
+    {
+        $plan = Plan::findOrFail($planId);
+
+        $request->validate([
+            'features' => 'required|array',
+            'features.*.key' => 'required|string',
+            'features.*.value' => 'required|string',
+        ]);
+
+        foreach ($request->features as $item) {
+            PlanFeature::updateOrCreate(
+                ['plan_id' => $plan->id, 'feature_key' => $item['key']],
+                ['feature_value' => $item['value']]
+            );
+        }
+
+        // Flush application cache
+        Cache::flush();
+
+        return back()->with('success', "Features for {$plan->name} updated successfully.");
     }
 }

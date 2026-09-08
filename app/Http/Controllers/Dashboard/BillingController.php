@@ -202,4 +202,33 @@ class BillingController extends Controller
         return redirect()->route('dashboard.billing.index')
             ->with('success', 'Subscribed to ' . $plan->name . ' plan successfully!');
     }
+
+    public function cancel(Request $request)
+    {
+        $user = Auth::user();
+        $subscription = $user->subscriptions()->where('status', 'active')->first();
+
+        if ($subscription) {
+            $subscription->update(['status' => 'cancelled']);
+        }
+
+        return redirect()->route('dashboard.billing.index')
+            ->with('success', 'Subscription cancelled. Premium features will remain active until the end of your billing cycle.');
+    }
+
+    public function renew(Request $request)
+    {
+        $user = Auth::user();
+        $subscription = $user->subscriptions()->latest()->first();
+
+        if ($subscription) {
+            $subscription->update([
+                'status' => 'active',
+                'ends_at' => now()->addMonth(),
+            ]);
+        }
+
+        return redirect()->route('dashboard.billing.index')
+            ->with('success', 'Subscription renewed successfully!');
+    }
 }

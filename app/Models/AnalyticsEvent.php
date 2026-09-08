@@ -14,14 +14,23 @@ class AnalyticsEvent extends Model
         'event_type',
         'link_id',
         'ip_hash',
+        'user_agent_hash',
         'country',
+        'region',
+        'city',
         'device',
+        'os',
         'browser',
+        'referrer',
+        'is_bot',
+        'occurred_at',
         'metadata',
     ];
 
     protected $casts = [
         'metadata' => 'array',
+        'is_bot' => 'boolean',
+        'occurred_at' => 'datetime',
     ];
 
     public function profile()

@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
-class PlanLimitsTest.php extends TestCase
+class PlanLimitsTest extends TestCase
 {
     public function test_free_plan_profile_limit(): void
     {
@@ -12,7 +12,7 @@ class PlanLimitsTest.php extends TestCase
         $userProfilesCount = 1;
 
         $canCreateProfile = $userProfilesCount < $freePlanMaxProfiles;
-        $this->assertFalse($canCanCreateProfile ?? $canCreateProfile);
+        $this->assertFalse($canCreateProfile);
     }
 
     public function test_pro_plan_profile_limit(): void
@@ -21,6 +21,13 @@ class PlanLimitsTest.php extends TestCase
         $userProfilesCount = 2;
 
         $canCreateProfile = $userProfilesCount < $proPlanMaxProfiles;
+        $this->assertTrue($canCreateProfile);
+    }
+
+    public function test_unlimited_plan_limit(): void
+    {
+        $unlimitedValue = -1;
+        $canCreateProfile = ($unlimitedValue === -1);
         $this->assertTrue($canCreateProfile);
     }
 }

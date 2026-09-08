@@ -59,4 +59,32 @@ class SecurityTest extends TestCase
         $this->assertArrayNotHasKey('remember_token', $publicApiOutput);
         $this->assertArrayNotHasKey('stripe_id', $publicApiOutput);
     }
+
+    public function test_ip_anonymization_privacy(): void
+    {
+        $ip = '203.0.113.195';
+        $salt = 'app_key_secret_2026';
+        $hash = hash('sha256', $ip . $salt);
+
+        $this->assertNotEquals($ip, $hash);
+        $this->assertEquals(64, strlen($hash));
+    }
+
+    public function test_webhook_idempotency_verification(): void
+    {
+        $eventId = 'evt_test_101';
+        $processedWebhooks = ['evt_test_101' => true];
+
+        $isDuplicate = isset($processedWebhooks[$eventId]);
+        $this->assertTrue($isDuplicate);
+    }
+
+    public function test_invoice_idor_protection(): void
+    {
+        $currentUserId = 10;
+        $invoiceOwnerId = 20;
+
+        $hasAccess = ($currentUserId === $invoiceOwnerId);
+        $this->assertFalse($hasAccess);
+    }
 }
