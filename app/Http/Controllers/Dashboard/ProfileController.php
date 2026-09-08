@@ -275,4 +275,82 @@ class ProfileController extends Controller
 
         return redirect()->route('dashboard.profiles.index')->with('success', 'Profile deleted.');
     }
+
+    public function exportJson(int $id)
+    {
+        $profile = Auth::user()->qrProfiles()
+            ->with(['socialLinks', 'customLinks', 'qrCode'])
+            ->findOrFail($id);
+
+        $data = [
+            'id' => $profile->id,
+            'slug' => $profile->slug,
+            'name' => $profile->name,
+            'designation' => $profile->designation,
+            'company' => $profile->company,
+            'bio' => $profile->bio,
+            'phone' => $profile->phone,
+            'email' => $profile->email,
+            'website' => $profile->website,
+            'status' => $profile->status,
+            'created_at' => $profile->created_at?->toIso8601String(),
+            'social_links' => $profile->socialLinks->map(fn($link) => [
+                'platform' => $link->platform,
+                'title' => $link->title,
+                'url' => $link->url,
+            ]),
+            'custom_links' => $profile->customLinks->map(fn($link) => [
+                'title' => $link->title,
+                'description' => $link->description,
+                'url' => $link->url,
+            ]),
+        ];
+
+        return response()->json($data, 200, [
+            'Content-Disposition' => "attachment; filename=\"profile-{$profile->slug}.json\"",
+        ]);
+    }
+
+    public function exportCsv(int $id)
+    {
+        $profile = Auth::user()->qrProfiles()
+            ->with(['socialLinks', 'customLinks'])
+            ->findOrFail($id);
+
+        $validator = app(\App\Services\LinkValidationService::class);
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"profile-{$profile->slug}.csv\"",
+        ];
+
+        $callback = function () use ($profile, $validator) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['Field', 'Value']);
+
+            fputcsv($file, ['ID', $profile->id]);
+            fputcsv($file, ['Slug', $validator->sanitizeCsvCell($profile->slug)]);
+            fputcsv($file, ['Name', $validator->sanitizeCsvCell($profile->name)]);
+            fputcsv($file, ['Designation', $validator->sanitizeCsvCell($profile->designation)]);
+            fputcsv($file, ['Company', $validator->sanitizeCsvCell($profile->company)]);
+            fputcsv($file, ['Bio', $validator->sanitizeCsvCell($profile->bio)]);
+            fputcsv($file, ['Phone', $validator->sanitizeCsvCell($profile->phone)]);
+            fputcsv($file, ['Email', $validator->sanitizeCsvCell($profile->email)]);
+            fputcsv($file, ['Website', $validator->sanitizeCsvCell($profile->website)]);
+            fputcsv($file, ['Status', $profile->status]);
+
+            foreach ($profile->socialLinks as $index => $link) {
+                fputcsv($file, ["Social Link #" . ($index + 1), $validator->sanitizeCsvCell("{$link->platform}: {$link->url}")]);
+            }
+
+            foreach ($profile->customLinks as $index => $link) {
+                fputcsv($file, ["Custom Link #" . ($index + 1), $validator->sanitizeCsvCell("{$link->title}: {$link->url}")]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

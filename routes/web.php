@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Public\PublicProfileController;
 use App\Http\Controllers\Public\PageController;
+use App\Http\Controllers\Public\ReportController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -15,6 +16,9 @@ use App\Http\Controllers\Dashboard\QRCodeController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
 use App\Http\Controllers\Dashboard\BillingController;
 use App\Http\Controllers\Dashboard\SettingsController;
+use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\BulkImportController;
+use App\Http\Controllers\Dashboard\DomainController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminProfileController;
@@ -25,7 +29,8 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminDomainController;
 use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\AdminReportController;
-use App\Http\Controllers\Dashboard\DomainController;
+use App\Http\Controllers\Admin\AdminReportModerationController;
+use App\Http\Controllers\Admin\AdminBlockedDomainController;
 use App\Http\Controllers\WebhookController;
 
 /*
@@ -78,6 +83,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])->name('profile.show');
+Route::post('/p/{slug}/report', [ReportController::class, 'store'])->name('profile.report');
 Route::get('/p/{slug}/booking', [PublicProfileController::class, 'showBooking'])->name('profile.booking');
 Route::get('/p/{slug}/contact', [PublicProfileController::class, 'downloadContact'])->name('profile.contact');
 Route::get('/u/{slug}', [PublicProfileController::class, 'show'])->name('profile.show.alias');
@@ -94,10 +100,21 @@ Route::get('/api/slugs/check', [PublicProfileController::class, 'checkSlug'])->n
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
     // QR Profile Management
     Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
     Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
     Route::post('/profiles', [ProfileController::class, 'store'])->name('profiles.store');
+    
+    // Bulk QR Import
+    Route::get('/profiles/bulk', [BulkImportController::class, 'index'])->name('profiles.bulk');
+    Route::post('/profiles/bulk/preview', [BulkImportController::class, 'preview'])->name('profiles.bulk.preview');
+    Route::post('/profiles/bulk/process', [BulkImportController::class, 'process'])->name('profiles.bulk.process');
+
     Route::get('/profiles/{id}/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
     Route::put('/profiles/{id}', [ProfileController::class, 'update'])->name('profiles.update');
     Route::patch('/profiles/{id}', [ProfileController::class, 'update']);
@@ -112,6 +129,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/profiles/{id}/qr/download', [QRCodeController::class, 'download'])->name('profiles.qr.download');
     Route::post('/profiles/{id}/qr/generate', [QRCodeController::class, 'update'])->name('profiles.qr.generate');
     Route::post('/profiles/{id}/qr', [QRCodeController::class, 'update'])->name('profiles.qr.update');
+
+    // Profile Data Export
+    Route::get('/profiles/{id}/export/json', [ProfileController::class, 'exportJson'])->name('profiles.export.json');
+    Route::get('/profiles/{id}/export/csv', [ProfileController::class, 'exportCsv'])->name('profiles.export.csv');
 
     // Custom Domains
     Route::get('/domains', [DomainController::class, 'index'])->name('domains.index');
@@ -199,6 +220,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/domains/{id}/verify', [AdminDomainController::class, 'verify'])->name('domains.verify');
     Route::post('/domains/{id}/toggle', [AdminDomainController::class, 'toggleStatus'])->name('domains.toggle');
 
+    // Abuse Reports & Blocked Domains
+    Route::get('/profile-reports', [AdminReportModerationController::class, 'index'])->name('profile-reports.index');
+    Route::patch('/profile-reports/{id}/status', [AdminReportModerationController::class, 'updateStatus'])->name('profile-reports.update-status');
+    Route::post('/profile-reports/{id}/suspend', [AdminReportModerationController::class, 'suspendProfile'])->name('profile-reports.suspend');
+    Route::get('/blocked-domains', [AdminBlockedDomainController::class, 'index'])->name('blocked-domains.index');
+    Route::post('/blocked-domains', [AdminBlockedDomainController::class, 'store'])->name('blocked-domains.store');
+    Route::delete('/blocked-domains/{id}', [AdminBlockedDomainController::class, 'destroy'])->name('blocked-domains.destroy');
+
     // Reports & Analytics Export
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export', [AdminReportController::class, 'exportCsv'])->name('reports.export');
@@ -213,4 +242,3 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings', [AdminSettingsController::class, 'index']);
 });
-
