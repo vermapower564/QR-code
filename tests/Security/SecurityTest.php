@@ -87,4 +87,37 @@ class SecurityTest extends TestCase
         $hasAccess = ($currentUserId === $invoiceOwnerId);
         $this->assertFalse($hasAccess);
     }
+
+    public function test_csv_formula_injection_defense(): void
+    {
+        $validator = new \App\Services\LinkValidationService();
+        
+        $dangerousCells = [
+            '=SUM(A1:A10)',
+            '+CMD|"/C calc"!A0',
+            '-2+3',
+            '@SUM(A1:A10)',
+            "\tTAB_KEY",
+        ];
+
+        foreach ($dangerousCells as $cell) {
+            $sanitized = $validator->sanitizeCsvCell($cell);
+            $this->assertStringStartsWith("'", $sanitized, "Cell '{$cell}' should be escaped with leading apostrophe.");
+        }
+
+        $safeCell = 'John Doe';
+        $this->assertEquals('John Doe', $validator->sanitizeCsvCell($safeCell));
+    }
+
+    public function test_link_validation_service_platform_matching(): void
+    {
+        $validator = new \App\Services\LinkValidationService();
+
+        $this->assertTrue($validator->validatePlatformUrl('instagram', 'https://instagram.com/johndoe'));
+        $this->assertTrue($validator->validatePlatformUrl('linkedin', 'https://www.linkedin.com/in/johndoe'));
+        
+        // Host matching rejects domain spoofing attempts
+        $this->assertFalse($validator->validatePlatformUrl('instagram', 'https://instagram.com.malicious-phishing.com/johndoe'));
+        $this->assertFalse($validator->validatePlatformUrl('facebook', 'javascript:alert(1)'));
+    }
 }
