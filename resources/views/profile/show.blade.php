@@ -7,11 +7,15 @@
 
     <!-- SEO & Social OpenGraph -->
     <meta name="description" content="{{ Str::limit($profile->bio ?? 'Digital social profile for ' . $profile->name, 150) }}">
+    <link rel="canonical" href="{{ url('/p/' . $profile->slug) }}" />
     <meta property="og:title" content="{{ $profile->name }}">
     <meta property="og:description" content="{{ Str::limit($profile->bio ?? 'View contact details and social links for ' . $profile->name, 150) }}">
+    <meta property="og:url" content="{{ url('/p/' . $profile->slug) }}">
+    <meta property="og:type" content="profile">
     @if($profile->profile_image)
         <meta property="og:image" content="{{ asset('storage/' . $profile->profile_image) }}">
     @endif
+
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\QRProfile;
+use App\Models\ProfileSlugHistory;
 use App\Models\SocialLink;
 use App\Models\CustomLink;
 use App\Services\AnalyticsService;
@@ -26,20 +27,33 @@ class PublicProfileController extends Controller
 
     public function show(string $slug, Request $request)
     {
-        $reserved = ['admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support', 'about', 'contact', 'settings'];
-        if (in_array(strtolower($slug), $reserved)) {
+        $slugLower = strtolower(trim($slug));
+
+        $reserved = config('reserved_slugs', [
+            'admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support',
+            'about', 'contact', 'settings', 'billing', 'profiles', 'analytics', 'templates', 'domains', 'p', 'u'
+        ]);
+
+        if (in_array($slugLower, $reserved)) {
             abort(404);
         }
 
-        $profile = QRProfile::where('slug', strtolower($slug))
+        // Primary lookup: Active QR profile
+        $profile = QRProfile::where('slug', $slugLower)
             ->with(['socialLinks', 'customLinks', 'template', 'user'])
             ->first();
 
+        // Secondary lookup: Historical slug redirect (301 Permanent Redirect)
         if (!$profile) {
+            $history = ProfileSlugHistory::where('old_slug', $slugLower)->first();
+            if ($history) {
+                return redirect()->route('profile.show', ['slug' => $history->new_slug], 301);
+            }
             return response()->view('errors.404_profile', [], 404);
         }
 
-        if ($profile->status !== 'active') {
+        // Check profile status and user account status
+        if ($profile->status !== 'active' || ($profile->user && $profile->user->status === 'suspended')) {
             return response()->view('profile.unavailable', ['profile' => $profile], 403);
         }
 
@@ -52,6 +66,45 @@ class PublicProfileController extends Controller
         }
 
         return view('profile.show', compact('profile'));
+    }
+
+    public function checkSlug(Request $request)
+    {
+        $request->validate(['slug' => 'required|string|max:255']);
+        $candidate = strtolower(trim($request->slug));
+
+        $reserved = config('reserved_slugs', [
+            'admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support',
+            'about', 'contact', 'settings', 'billing', 'profiles', 'analytics', 'templates', 'domains', 'p', 'u'
+        ]);
+
+        if (in_array($candidate, $reserved)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'This username is reserved by the system.'
+            ]);
+        }
+
+        $exists = QRProfile::where('slug', $candidate)->exists();
+        if ($exists) {
+            return response()->json([
+                'available' => false,
+                'message' => 'This username is already taken by another user.'
+            ]);
+        }
+
+        $inHistory = ProfileSlugHistory::where('old_slug', $candidate)->exists();
+        if ($inHistory) {
+            return response()->json([
+                'available' => false,
+                'message' => 'This username was previously used and cannot be claimed.'
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'Username is available!'
+        ]);
     }
 
     public function showBooking(string $slug)
@@ -122,3 +175,4 @@ class PublicProfileController extends Controller
         return redirect()->away($targetUrl);
     }
 }
+

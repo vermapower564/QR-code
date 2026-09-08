@@ -753,9 +753,12 @@ app.get('/dashboard', (req, res) => {
                 </div>
                 <nav class="space-y-2 font-medium text-sm">
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 bg-sky-600 text-white rounded-xl"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                    <a href="/dashboard/domains" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-globe"></i> Custom Domains</a>
                     <a href="/dashboard/billing" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-credit-card"></i> Billing Module</a>
+                    <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 hover:bg-purple-900 text-purple-300 rounded-xl"><i class="fa-solid fa-user-shield"></i> Admin Panel</a>
                     <a href="/p/john-doe" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 1: John Doe</a>
                 </nav>
+
             </div>
             <a href="/" class="text-sm font-semibold text-rose-400"><i class="fa-solid fa-right-from-bracket mr-2"></i> Exit Server</a>
         </aside>
@@ -977,13 +980,121 @@ app.get('/dashboard/billing/payment-methods', (req, res) => {
                         <p class="text-xs text-slate-500">Expires 12/2028</p>
                     </div>
                 </div>
+        </div>
+    </div>
+    `));
+});
+
+// User Custom Domains Route
+app.get('/dashboard/domains', (req, res) => {
+    res.send(htmlWrapper('Custom Domains', `
+    <div class="min-h-screen bg-slate-50 p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Custom Domains</h1>
+                <p class="text-xs text-slate-500 mt-1">Connect custom domain names to your dynamic QR profiles.</p>
+            </div>
+            <a href="/dashboard" class="text-xs font-bold text-slate-600 hover:text-slate-900">&larr; Back to Dashboard</a>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 mb-2">Connect New Custom Domain</h3>
+            <p class="text-xs text-slate-500 mb-4">Enter your domain or subdomain (e.g. <span class="font-mono font-semibold">qr.yourbrand.com</span>).</p>
+            <form action="/dashboard/domains" method="POST" class="flex flex-wrap sm:flex-nowrap gap-3">
+                <input type="text" name="domain" placeholder="qr.yourbrand.com" class="w-full p-3 rounded-xl border border-slate-300 text-sm outline-none"/>
+                <button type="submit" class="px-6 py-3 bg-sky-600 text-white font-bold text-sm rounded-xl shadow shrink-0">Add Domain</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 mb-4">Your Connected Domains</h3>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-base font-black text-slate-900">card.mybrand.com</span>
+                    <span class="ml-3 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-emerald-100 text-emerald-800">Active</span>
+                </div>
+                <button class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-200">Remove</button>
             </div>
         </div>
     </div>
     `));
 });
 
+// Live Slug Check API
+app.get('/api/slugs/check', (req, res) => {
+    const slug = req.query.slug || '';
+    const reserved = ['admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support', 'about', 'contact', 'settings'];
+    
+    if (reserved.includes(slug.toLowerCase())) {
+        return res.json({ available: false, message: 'This username is reserved by the system.' });
+    }
+    
+    const exists = profiles.some(p => p.slug === slug.toLowerCase());
+    if (exists) {
+        return res.json({ available: false, message: 'This username is already taken.' });
+    }
+    
+    return res.json({ available: true, message: 'Username is available!' });
+});
+
+// Admin Panel Routes
+app.get('/admin', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QR Identity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex">
+    <aside class="w-64 bg-slate-950 text-slate-300 p-6 flex flex-col justify-between border-r border-slate-800 shrink-0">
+        <div>
+            <div class="flex items-center gap-3 text-white text-xl font-bold mb-8">
+                <div class="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center text-white text-base">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <span>Admin Console</span>
+            </div>
+            <nav class="space-y-1 text-sm font-medium">
+                <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-purple-600 text-white"><i class="fa-solid fa-chart-line w-5"></i> Overview</a>
+                <a href="/admin/users" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-users w-5"></i> Users</a>
+                <a href="/admin/profiles" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-qrcode w-5"></i> Profiles</a>
+                <a href="/admin/plans" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-tags w-5"></i> Plans</a>
+                <a href="/admin/templates" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-palette w-5"></i> Templates</a>
+            </nav>
+        </div>
+        <a href="/dashboard" class="text-xs text-slate-400 hover:text-white">&larr; User Dashboard</a>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <h1 class="text-2xl font-black text-white mb-6">Admin Panel Overview</h1>
+        <div class="grid grid-cols-4 gap-6 mb-8">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-400 uppercase">Total Users</span>
+                <p class="text-3xl font-black text-white mt-1">1,240</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-400 uppercase">Active Profiles</span>
+                <p class="text-3xl font-black text-white mt-1">${profiles.length}</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-400 uppercase">Total Scans</span>
+                <p class="text-3xl font-black text-white mt-1">14,820</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-400 uppercase">MRR</span>
+                <p class="text-3xl font-black text-white mt-1">$4,920</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>`);
+});
+
 app.listen(PORT, () => {
+
     console.log(`\n==================================================`);
     console.log(`  Dynamic QR Social Profile SaaS Web Server Active`);
     console.log(`  Access Application at: http://localhost:${PORT}`);

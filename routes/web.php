@@ -22,6 +22,10 @@ use App\Http\Controllers\Admin\AdminPlanController;
 use App\Http\Controllers\Admin\AdminTemplateController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\AdminDomainController;
+use App\Http\Controllers\Admin\AdminAuditLogController;
+use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Dashboard\DomainController;
 use App\Http\Controllers\WebhookController;
 
 /*
@@ -70,7 +74,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 3. Public QR Profile Core Routes
+| 3. Public QR Profile Core Routes & Live API
 |--------------------------------------------------------------------------
 */
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])->name('profile.show');
@@ -80,6 +84,7 @@ Route::get('/u/{slug}', [PublicProfileController::class, 'show'])->name('profile
 Route::get('/u/{slug}/booking', [PublicProfileController::class, 'showBooking'])->name('profile.booking.alias');
 Route::get('/u/{slug}/contact', [PublicProfileController::class, 'downloadContact'])->name('profile.contact.alias');
 Route::get('/click/{profile}/{link}', [PublicProfileController::class, 'trackClick'])->name('profile.click');
+Route::get('/api/slugs/check', [PublicProfileController::class, 'checkSlug'])->name('api.slugs.check');
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +112,12 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/profiles/{id}/qr/download', [QRCodeController::class, 'download'])->name('profiles.qr.download');
     Route::post('/profiles/{id}/qr/generate', [QRCodeController::class, 'update'])->name('profiles.qr.generate');
     Route::post('/profiles/{id}/qr', [QRCodeController::class, 'update'])->name('profiles.qr.update');
+
+    // Custom Domains
+    Route::get('/domains', [DomainController::class, 'index'])->name('domains.index');
+    Route::post('/domains', [DomainController::class, 'store'])->name('domains.store');
+    Route::post('/domains/{id}/verify', [DomainController::class, 'verify'])->name('domains.verify');
+    Route::delete('/domains/{id}', [DomainController::class, 'destroy'])->name('domains.destroy');
 
     // Social Links & Custom Links
     Route::post('/profiles/{id}/social-links', [ProfileController::class, 'addSocialLink'])->name('profiles.social.add');
@@ -153,27 +164,47 @@ Route::post('/webhooks/razorpay', [WebhookController::class, 'handleRazorpay'])-
 | 14-22. Admin Panel Routes (Auth + Admin Role)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Users
+    // User Management
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('users.show');
     Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
     Route::patch('/users/{id}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
     Route::post('/users/{id}/plan', [AdminUserController::class, 'updatePlan'])->name('users.plan');
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
-    // Profiles Moderation
+    // Profile Management
     Route::get('/profiles', [AdminProfileController::class, 'index'])->name('profiles.index');
+    Route::get('/profiles/{id}', [AdminProfileController::class, 'show'])->name('profiles.show');
     Route::post('/profiles/{id}/toggle', [AdminProfileController::class, 'toggleStatus'])->name('profiles.toggle');
     Route::patch('/profiles/{id}/status', [AdminProfileController::class, 'toggleStatus'])->name('profiles.status');
+    Route::delete('/profiles/{id}', [AdminProfileController::class, 'destroy'])->name('profiles.destroy');
 
-    // Plans
+    // Plan Management
     Route::get('/plans', [AdminPlanController::class, 'index'])->name('plans.index');
     Route::post('/plans', [AdminPlanController::class, 'store'])->name('plans.store');
+    Route::post('/plans/{id}/features', [AdminPlanController::class, 'updateFeatures'])->name('plans.features');
+    Route::post('/plans/{id}/archive', [AdminPlanController::class, 'archive'])->name('plans.archive');
 
-    // Templates
+    // Template Management
     Route::get('/templates', [AdminTemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [AdminTemplateController::class, 'store'])->name('templates.store');
+    Route::post('/templates/{id}/toggle', [AdminTemplateController::class, 'toggleStatus'])->name('templates.toggle');
+    Route::post('/templates/{id}/duplicate', [AdminTemplateController::class, 'duplicate'])->name('templates.duplicate');
+
+    // Domain Moderation
+    Route::get('/domains', [AdminDomainController::class, 'index'])->name('domains.index');
+    Route::post('/domains/{id}/verify', [AdminDomainController::class, 'verify'])->name('domains.verify');
+    Route::post('/domains/{id}/toggle', [AdminDomainController::class, 'toggleStatus'])->name('domains.toggle');
+
+    // Reports & Analytics Export
+    Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [AdminReportController::class, 'exportCsv'])->name('reports.export');
+
+    // Audit Logs
+    Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
 
     // Payments
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
@@ -182,3 +213,4 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings', [AdminSettingsController::class, 'index']);
 });
+

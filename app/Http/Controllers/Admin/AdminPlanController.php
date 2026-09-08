@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\PlanFeature;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -45,6 +46,7 @@ class AdminPlanController extends Controller
             'qr_logo' => $request->price > 0 ? 'true' : 'false',
             'advanced_analytics' => $request->price > 0 ? 'true' : 'false',
             'remove_branding' => $request->price > 0 ? 'true' : 'false',
+            'custom_domain' => $request->price > 20 ? 'true' : 'false',
             'custom_links' => 'true',
             'contact_card' => 'true',
         ];
@@ -56,6 +58,18 @@ class AdminPlanController extends Controller
                 'feature_value' => $val,
             ]);
         }
+
+        Cache::flush();
+
+        AuditLogService::log(
+            $request->user()?->id ?? 1,
+            'plan.create',
+            'Plan',
+            $plan->id,
+            "Created new plan {$plan->name} ({$plan->slug})",
+            ['price' => $plan->price, 'currency' => $plan->currency],
+            $request->ip()
+        );
 
         return back()->with('success', 'Plan created successfully.');
     }
@@ -77,9 +91,41 @@ class AdminPlanController extends Controller
             );
         }
 
-        // Flush application cache
+        // Flush application feature cache
         Cache::flush();
+
+        AuditLogService::log(
+            $request->user()?->id ?? 1,
+            'plan.features_update',
+            'Plan',
+            $plan->id,
+            "Updated features for plan {$plan->name}",
+            $request->features,
+            $request->ip()
+        );
 
         return back()->with('success', "Features for {$plan->name} updated successfully.");
     }
+
+    public function archive(Request $request, int $planId)
+    {
+        $plan = Plan::findOrFail($planId);
+        $plan->status = 'archived';
+        $plan->save();
+
+        Cache::flush();
+
+        AuditLogService::log(
+            $request->user()?->id ?? 1,
+            'plan.archive',
+            'Plan',
+            $plan->id,
+            "Archived plan {$plan->name}",
+            [],
+            $request->ip()
+        );
+
+        return back()->with('success', "Plan {$plan->name} archived successfully.");
+    }
 }
+

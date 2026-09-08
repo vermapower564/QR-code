@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'admin',
+    'login',
+    'register',
+    'dashboard',
+    'api',
+    'pricing',
+    'support',
+    'about',
+    'contact',
+    'settings',
+    'billing',
+    'profiles',
+    'analytics',
+    'templates',
+    'domains',
+    'invoices',
+    'payment-method',
+    'forgot-password',
+    'reset-password',
+    'onboarding',
+    'logout',
+    'p',
+    'u',
+    'click',
+];

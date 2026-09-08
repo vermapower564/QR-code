@@ -28,6 +28,10 @@
                     <i class="fa-solid fa-users w-5"></i>
                     <span>User Management</span>
                 </a>
+                <a href="{{ route('admin.profiles.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('admin.profiles.*') ? 'bg-purple-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                    <i class="fa-solid fa-qrcode w-5"></i>
+                    <span>QR Profiles</span>
+                </a>
                 <a href="{{ route('admin.plans.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('admin.plans.*') ? 'bg-purple-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-tags w-5"></i>
                     <span>Subscription Plans</span>
@@ -36,7 +40,20 @@
                     <i class="fa-solid fa-palette w-5"></i>
                     <span>Profile Templates</span>
                 </a>
+                <a href="{{ route('admin.domains.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('admin.domains.*') ? 'bg-purple-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                    <i class="fa-solid fa-globe w-5"></i>
+                    <span>Custom Domains</span>
+                </a>
+                <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('admin.reports.*') ? 'bg-purple-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                    <i class="fa-solid fa-file-csv w-5"></i>
+                    <span>Reports & Exports</span>
+                </a>
+                <a href="{{ route('admin.audit-logs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('admin.audit-logs.*') ? 'bg-purple-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                    <i class="fa-solid fa-shield-halved w-5"></i>
+                    <span>Audit Logs</span>
+                </a>
             </nav>
+
         </div>
 
         <div>
