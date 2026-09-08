@@ -4,31 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dynamic QR Social Profile SaaS')</title>
-    <!-- Tailwind CSS CDN for instant rendering -->
+    <!-- Tailwind CSS CDN Fallback + Vite Asset Pipeline -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @if(file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-sky-500 selection:text-white">
     <!-- Global Header -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
