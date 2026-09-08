@@ -628,6 +628,25 @@ app.get('/u/:slug', (req, res) => res.redirect(`/p/${req.params.slug}`));
 app.get('/u/:slug/booking', (req, res) => res.redirect(`/p/${req.params.slug}/booking`));
 app.get('/u/:slug/contact', (req, res) => res.redirect(`/p/${req.params.slug}/contact`));
 
+// Link Click Redirect Route (Open Redirect Protection & Event Tracking)
+app.get('/click/:profileId/:linkId', (req, res) => {
+    const profileId = parseInt(req.params.profileId);
+    const linkId = parseInt(req.params.linkId);
+
+    const profile = profiles.find(p => p.id === profileId || p.slug === req.params.profileId);
+    if (!profile || profile.status !== 'active') {
+        return res.status(404).send('Profile Not Found or Suspended');
+    }
+
+    const link = [...(profile.social_links || []), ...(profile.custom_links || [])].find(l => l.id === linkId);
+    if (!link || link.status === 'inactive') {
+        return res.status(404).send('Link Not Found or Inactive');
+    }
+
+    link.clicks = (link.clicks || 0) + 1;
+    return res.redirect(link.url);
+});
+
 // Public Profile (/p/:slug)
 app.get('/p/:slug', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
