@@ -361,6 +361,10 @@ app.get('/register', (req, res) => {
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
                     <input type="email" name="email" placeholder="john@example.com" required class="w-full p-3 rounded-xl border text-sm outline-none"/>
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Website / URL Link</label>
+                    <input type="url" name="website" placeholder="https://example.com" class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Company</label>
@@ -385,7 +389,7 @@ app.get('/register', (req, res) => {
                             <span :class="strength.color" x-text="strength.label" class="px-1.5 py-0.5 rounded"></span>
                         </div>
                         <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                            <div class="h-full transition-all duration-300" :class="strength.color" :style="\`width: \${strength.percent}%\`"></div>
+                            <div class="h-full transition-all duration-300" :class="strength.color" :style="`width: ${strength.percent}%`"></div>
                         </div>
                     </div>
                 </div>
@@ -411,6 +415,9 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
     currentUser.onboarding_completed = false;
+    if (req.body.website) {
+        currentUser.website = req.body.website;
+    }
     res.redirect('/email/verify');
 });
 

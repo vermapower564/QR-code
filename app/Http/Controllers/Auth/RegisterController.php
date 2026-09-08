@@ -35,6 +35,19 @@ class RegisterController extends Controller
             ]);
         }
 
+        // 2. Validate and Normalize Website / URL Link
+        if ($request->filled('website')) {
+            $trimmedWebsite = trim($request->website);
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+
+            if (!$linkValidator->isValidUrl($trimmedWebsite)) {
+                throw ValidationException::withMessages([
+                    'website' => ['Please enter a valid website URL.'],
+                ]);
+            }
+            $request->merge(['website' => $trimmedWebsite]);
+        }
+
         $messages = [
             'name.required' => 'Full name is required.',
             'email.required' => 'Email is required.',
@@ -42,6 +55,7 @@ class RegisterController extends Controller
             'email.unique' => 'An account with this email already exists.',
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Passwords do not match.',
+            'website.url' => 'Please enter a valid website URL.',
         ];
 
         $request->validate([
@@ -55,6 +69,7 @@ class RegisterController extends Controller
                     ->numbers()
                     ->symbols()
             ],
+            'website' => ['nullable', 'string', 'max:2048'],
             'company' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
         ], $messages);
@@ -66,6 +81,7 @@ class RegisterController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
+            'website' => $request->website,
             'company' => $request->company,
             'plan_id' => $freePlan ? $freePlan->id : null,
             'role' => 'user',

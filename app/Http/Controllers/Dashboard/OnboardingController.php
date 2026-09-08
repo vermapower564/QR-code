@@ -82,7 +82,7 @@ class OnboardingController extends Controller
                     'bio' => $request->bio,
                     'phone' => $request->phone,
                     'email' => $request->email,
-                    'website' => $request->website,
+                    'website' => $request->website ?: $user->website,
                     'template_id' => $request->template_id,
                     'status' => 'active',
                 ]);
@@ -97,7 +97,7 @@ class OnboardingController extends Controller
                     'bio' => $request->bio,
                     'phone' => $request->phone,
                     'email' => $request->email,
-                    'website' => $request->website,
+                    'website' => $request->website ?: $user->website,
                     'template_id' => $request->template_id,
                     'theme_data' => [
                         'bg_color' => '#f8fafc',
