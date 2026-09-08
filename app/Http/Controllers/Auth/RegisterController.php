@@ -36,25 +36,16 @@ class RegisterController extends Controller
         }
 
         // 2. Validate and Normalize Website / URL Link
-        $trimmedWebsite = trim((string) $request->input('website', ''));
-        if (empty($trimmedWebsite)) {
-            throw ValidationException::withMessages([
-                'website' => ['Please enter a valid website URL.'],
-            ]);
-        }
-
-        // Auto-prepend https:// if scheme is missing (e.g. example.com -> https://example.com)
-        if (!preg_match('~^https?://~i', $trimmedWebsite)) {
-            $trimmedWebsite = 'https://' . $trimmedWebsite;
-        }
-
+        $rawWebsite = (string) $request->input('website', '');
         $linkValidator = app(\App\Services\LinkValidationService::class);
-        if (!$linkValidator->isValidUrl($trimmedWebsite)) {
+        $normalizedWebsite = $linkValidator->normalizeUrl($rawWebsite);
+
+        if (empty($normalizedWebsite) || !$linkValidator->isValidUrl($normalizedWebsite)) {
             throw ValidationException::withMessages([
                 'website' => ['Please enter a valid website URL.'],
             ]);
         }
-        $request->merge(['website' => $trimmedWebsite]);
+        $request->merge(['website' => $normalizedWebsite]);
 
         $messages = [
             'name.required' => 'Full name is required.',

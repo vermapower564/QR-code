@@ -50,6 +50,15 @@ class ProfileController extends Controller
             return back()->with('error', 'Plan limit reached.');
         }
 
+        if ($request->filled('website')) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $normalizedWebsite = $linkValidator->normalizeUrl($request->website);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                return back()->withErrors(['website' => 'Please enter a valid website URL.'])->withInput();
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'alpha_dash', 'max:50', 'unique:qr_profiles,slug'],
@@ -58,12 +67,13 @@ class ProfileController extends Controller
             'bio' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:2048'],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'template_id' => ['nullable', 'exists:templates,id'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
+            'website.url' => 'Please enter a valid website URL.',
         ]);
 
         // Reserved slug validation
@@ -126,6 +136,15 @@ class ProfileController extends Controller
     {
         $profile = Auth::user()->qrProfiles()->findOrFail($id);
 
+        if ($request->filled('website')) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $normalizedWebsite = $linkValidator->normalizeUrl($request->website);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                return back()->withErrors(['website' => 'Please enter a valid website URL.'])->withInput();
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'alpha_dash', 'max:50', 'unique:qr_profiles,slug,' . $profile->id],
@@ -134,11 +153,12 @@ class ProfileController extends Controller
             'bio' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:2048'],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
+            'website.url' => 'Please enter a valid website URL.',
         ]);
 
         if ($request->hasFile('profile_image')) {

@@ -23,6 +23,15 @@ class ProfileApiController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('website')) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $normalizedWebsite = $linkValidator->normalizeUrl($request->website);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                return response()->json(['success' => false, 'message' => 'Please enter a valid website URL.'], 422);
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|alpha_dash|unique:qr_profiles,slug',
@@ -30,7 +39,7 @@ class ProfileApiController extends Controller
             'company' => 'nullable|string',
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => 'nullable|email',
-            'website' => 'nullable|url',
+            'website' => 'nullable|string|max:2048',
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ]);
@@ -61,13 +70,22 @@ class ProfileApiController extends Controller
     {
         $profile = $request->user()->qrProfiles()->findOrFail($id);
 
+        if ($request->filled('website')) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $normalizedWebsite = $linkValidator->normalizeUrl($request->website);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                return response()->json(['success' => false, 'message' => 'Please enter a valid website URL.'], 422);
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        }
+
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'designation' => 'nullable|string',
             'company' => 'nullable|string',
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => 'nullable|email',
-            'website' => 'nullable|url',
+            'website' => 'nullable|string|max:2048',
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ]);

@@ -78,6 +78,13 @@
                 </a>
             @endif
 
+            @if($profile->website)
+                <a href="{{ $profile->website }}" target="_blank" rel="noopener noreferrer" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
+                    <i class="fa-solid fa-globe text-sky-500 text-lg block mb-1"></i>
+                    <span class="text-xs font-bold block">Website</span>
+                </a>
+            @endif
+
             @if($profile->phone)
                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->phone) }}" target="_blank" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
                     <i class="fa-brands fa-whatsapp text-emerald-400 text-lg block mb-1"></i>
