@@ -76,6 +76,9 @@ Route::middleware('auth')->group(function () {
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])->name('profile.show');
 Route::get('/p/{slug}/booking', [PublicProfileController::class, 'showBooking'])->name('profile.booking');
 Route::get('/p/{slug}/contact', [PublicProfileController::class, 'downloadContact'])->name('profile.contact');
+Route::get('/u/{slug}', [PublicProfileController::class, 'show'])->name('profile.show.alias');
+Route::get('/u/{slug}/booking', [PublicProfileController::class, 'showBooking'])->name('profile.booking.alias');
+Route::get('/u/{slug}/contact', [PublicProfileController::class, 'downloadContact'])->name('profile.contact.alias');
 Route::get('/click/{profile}/{link}', [PublicProfileController::class, 'trackClick'])->name('profile.click');
 
 /*

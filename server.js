@@ -623,6 +623,11 @@ app.get('/api/qr/:slug', async (req, res) => {
     }
 });
 
+// Public Profile Alias Routes (/u/:slug)
+app.get('/u/:slug', (req, res) => res.redirect(`/p/${req.params.slug}`));
+app.get('/u/:slug/booking', (req, res) => res.redirect(`/p/${req.params.slug}/booking`));
+app.get('/u/:slug/contact', (req, res) => res.redirect(`/p/${req.params.slug}/contact`));
+
 // Public Profile (/p/:slug)
 app.get('/p/:slug', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
