@@ -26,12 +26,7 @@ let profiles = [
         email: 'john@abctechnologies.com',
         website: 'https://abctechnologies.com',
         status: 'active',
-        theme_data: {
-            bg_color: '#f8fafc',
-            text_color: '#0f172a',
-            button_style: 'rounded-xl',
-            theme_preset: 'Business'
-        },
+        theme_data: { bg_color: '#f8fafc', text_color: '#0f172a', button_style: 'rounded-xl', theme_preset: 'Business' },
         scans_count: 124,
         social_links: [
             { id: 101, platform: 'website', title: 'Company Website', url: 'https://abctechnologies.com' },
@@ -58,12 +53,7 @@ let profiles = [
         email: 'sarah@creatorstudio.com',
         website: 'https://youtube.com/@sarahsharma',
         status: 'active',
-        theme_data: {
-            bg_color: '#faf5ff',
-            text_color: '#3b0764',
-            button_style: 'rounded-full',
-            theme_preset: 'Creator'
-        },
+        theme_data: { bg_color: '#faf5ff', text_color: '#3b0764', button_style: 'rounded-full', theme_preset: 'Creator' },
         scans_count: 860,
         social_links: [
             { id: 106, platform: 'instagram', title: 'Instagram', url: 'https://instagram.com/sarahsharma' },
@@ -90,12 +80,7 @@ let profiles = [
         email: 'alex@vermacode.dev',
         website: 'https://vermacode.dev',
         status: 'active',
-        theme_data: {
-            bg_color: '#0f172a',
-            text_color: '#f8fafc',
-            button_style: 'rounded-xl',
-            theme_preset: 'Dark'
-        },
+        theme_data: { bg_color: '#0f172a', text_color: '#f8fafc', button_style: 'rounded-xl', theme_preset: 'Dark' },
         scans_count: 450,
         social_links: [
             { id: 111, platform: 'github', title: 'GitHub Profile', url: 'https://github.com/alexverma' },
@@ -126,14 +111,6 @@ function htmlWrapper(title, content) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
-    ${content}
-</body>
-</html>`;
-}
-
-// 1. Landing Page (/)
-app.get('/', (req, res) => {
-    res.send(htmlWrapper('Dynamic QR Social Profile SaaS', `
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
@@ -142,18 +119,36 @@ app.get('/', (req, res) => {
                 </div>
                 <span>QR Identity</span>
             </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="/pricing" class="hover:text-slate-900">Pricing</a>
+                <a href="/about" class="hover:text-slate-900">About</a>
+                <a href="/contact" class="hover:text-slate-900">Contact</a>
+            </nav>
             <div class="flex items-center gap-4">
                 <a href="/login" class="text-sm font-semibold text-slate-700 hover:text-slate-900">Sign in</a>
                 <a href="/dashboard" class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-xl hover:bg-sky-700 shadow-sm">
-                    Open Dashboard
+                    Dashboard
                 </a>
             </div>
         </div>
     </header>
+    <main>${content}</main>
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs border-t border-slate-800 space-x-4">
+        <a href="/terms" class="hover:underline">Terms</a>
+        <a href="/privacy" class="hover:underline">Privacy</a>
+        <a href="/cookie-policy" class="hover:underline">Cookies</a>
+        <a href="/refund-policy" class="hover:underline">Refund Policy</a>
+    </footer>
+</body>
+</html>`;
+}
 
+// Public Pages
+app.get('/', (req, res) => {
+    res.send(htmlWrapper('Dynamic QR Social Profile SaaS', `
     <section class="py-20 text-center bg-gradient-to-b from-sky-50 to-white px-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold uppercase mb-6">
-            <i class="fa-solid fa-bolt"></i> Live Development Web Server Running
+            <i class="fa-solid fa-bolt"></i> Approved Architecture Deployed
         </div>
         <h1 class="text-4xl sm:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight text-slate-900">
             Create your digital identity. <br/>
@@ -178,7 +173,15 @@ app.get('/', (req, res) => {
     `));
 });
 
-// 2. Dynamic QR Code API Endpoint
+app.get('/pricing', (req, res) => res.send(htmlWrapper('Pricing', `<div class="max-w-4xl mx-auto py-16 px-4 text-center"><h1 class="text-3xl font-bold mb-4">Pricing Plans</h1><p class="text-slate-600">Starter Free ($0), Pro Creator ($9/mo), Business ($29/mo)</p></div>`)));
+app.get('/about', (req, res) => res.send(htmlWrapper('About Us', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">About QR Identity</h1><p class="text-slate-600">Enterprise dynamic QR profile SaaS platform.</p></div>`)));
+app.get('/contact', (req, res) => res.send(htmlWrapper('Contact Us', `<div class="max-w-xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Contact Support</h1><p class="text-slate-600 mb-4">Reach out to our team.</p></div>`)));
+app.get('/terms', (req, res) => res.send(htmlWrapper('Terms', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Terms & Conditions</h1></div>`)));
+app.get('/privacy', (req, res) => res.send(htmlWrapper('Privacy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Privacy Policy</h1></div>`)));
+app.get('/cookie-policy', (req, res) => res.send(htmlWrapper('Cookie Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Cookie Policy</h1></div>`)));
+app.get('/refund-policy', (req, res) => res.send(htmlWrapper('Refund Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Refund Policy</h1></div>`)));
+
+// Dynamic QR Code API Endpoint
 app.get('/api/qr/:slug', async (req, res) => {
     const slug = req.params.slug;
     const fg = req.query.fg || '#000000';
@@ -204,7 +207,7 @@ app.get('/api/qr/:slug', async (req, res) => {
     }
 });
 
-// 3. Public Profile (/p/:slug)
+// Public Profile (/p/:slug)
 app.get('/p/:slug', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
     if (!profile) {
@@ -218,7 +221,6 @@ app.get('/p/:slug', (req, res) => {
     }
 
     profile.scans_count++;
-
     const bg = profile.theme_data.bg_color || '#f8fafc';
     const text = profile.theme_data.text_color || '#0f172a';
 
@@ -242,7 +244,6 @@ app.get('/p/:slug', (req, res) => {
             <p class="text-sm opacity-70 mt-3 max-w-xs mx-auto">${profile.bio}</p>
         </div>
 
-        <!-- Action Buttons -->
         <div class="grid grid-cols-3 gap-2.5 mb-6">
             <a href="tel:${profile.phone}" class="bg-white/20 border border-black/10 p-3 rounded-2xl text-center shadow-sm hover:scale-105 transition">
                 <i class="fa-solid fa-phone text-emerald-500 text-lg block mb-1"></i>
@@ -262,7 +263,6 @@ app.get('/p/:slug', (req, res) => {
             <i class="fa-solid fa-user-plus text-lg"></i> Save Contact to Phone (.vcf)
         </a>
 
-        <!-- Social Links -->
         <div class="space-y-3 mb-8">
             <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 px-1">Social Networks</h3>
             ${profile.social_links.map(l => `
@@ -276,7 +276,6 @@ app.get('/p/:slug', (req, res) => {
             `).join('')}
         </div>
 
-        <!-- Custom Links -->
         <div class="space-y-3 mb-8">
             <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 px-1">Featured Buttons</h3>
             ${profile.custom_links.map(l => `
@@ -298,7 +297,7 @@ app.get('/p/:slug', (req, res) => {
 </html>`);
 });
 
-// 4. Calendly-Style Empty Openings Page (/p/:slug/booking)
+// Empty Openings Page (/p/:slug/booking)
 app.get('/p/:slug/booking', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug) || profiles[0];
 
@@ -352,7 +351,7 @@ app.get('/p/:slug/booking', (req, res) => {
 </html>`);
 });
 
-// 5. Contact Card (.vcf Download)
+// Contact Card (.vcf Download)
 app.get('/p/:slug/contact', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
     if (!profile) return res.status(404).send("Not Found");
@@ -373,7 +372,7 @@ END:VCARD`;
     res.send(vcf);
 });
 
-// 6. Dashboard Overview (/dashboard)
+// Dashboard (/dashboard)
 app.get('/dashboard', (req, res) => {
     res.send(htmlWrapper('Dashboard Overview', `
     <div class="min-h-screen flex bg-slate-100">
