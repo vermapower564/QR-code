@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen flex">
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar Navigation (Desktop) -->
     <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col justify-between p-6">
         <div>
             <div class="flex items-center gap-3 text-white text-xl font-bold mb-8 px-2">
@@ -23,18 +23,30 @@
                 <span>QR Identity</span>
             </div>
 
-            <nav class="space-y-1">
-                <a href="{{ route('dashboard.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('dashboard.index') ? 'bg-sky-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+            <nav class="space-y-1.5">
+                <a href="{{ route('dashboard.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition {{ request()->routeIs('dashboard.index') ? 'bg-sky-600 text-white shadow-md' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-chart-pie w-5"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('dashboard.profiles.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('dashboard.profiles.*') ? 'bg-sky-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                <a href="{{ route('dashboard.profiles.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition {{ request()->routeIs('dashboard.profiles.index') ? 'bg-sky-600 text-white shadow-md' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-id-card w-5"></i>
                     <span>My QR Profiles</span>
                 </a>
-                <a href="{{ route('dashboard.billing.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('dashboard.billing.*') ? 'bg-sky-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                <a href="{{ route('dashboard.profiles.create') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition text-sky-400 hover:bg-slate-800 hover:text-sky-300 border border-sky-500/20">
+                    <i class="fa-solid fa-plus-circle w-5"></i>
+                    <span>Create QR</span>
+                </a>
+                <a href="{{ route('dashboard.billing.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition {{ request()->routeIs('dashboard.billing.*') ? 'bg-sky-600 text-white shadow-md' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-credit-card w-5"></i>
                     <span>Billing & Plans</span>
+                </a>
+                <a href="{{ route('dashboard.settings.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition {{ request()->routeIs('dashboard.settings.*') ? 'bg-sky-600 text-white shadow-md' : 'hover:bg-slate-800 text-slate-400 hover:text-white' }}">
+                    <i class="fa-solid fa-gear w-5"></i>
+                    <span>Account Settings</span>
+                </a>
+                <a href="{{ route('contact') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition hover:bg-slate-800 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-headset w-5"></i>
+                    <span>Support</span>
                 </a>
             </nav>
         </div>
@@ -42,11 +54,11 @@
         <div class="border-t border-slate-800 pt-4">
             <div class="flex items-center gap-3 px-2 mb-4">
                 <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-sm">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
                 </div>
                 <div class="overflow-hidden">
-                    <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                    <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name ?? 'User' }}</p>
+                    <p class="text-xs text-slate-400 truncate">{{ Auth::user()->email ?? '' }}</p>
                 </div>
             </div>
             <form action="{{ route('logout') }}" method="POST">
