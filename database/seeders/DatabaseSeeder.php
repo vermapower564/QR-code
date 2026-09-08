@@ -49,27 +49,30 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // 2. Seed Templates
-        $bizTemplate = Template::firstOrCreate(['slug' => 'business'], [
-            'name' => 'Business Card',
-            'category' => 'Business',
-            'is_premium' => false,
-            'status' => 'active',
-        ]);
+        // 2. Seed All 12 Initial Profile Templates
+        $templatesData = [
+            ['slug' => 'business-card', 'name' => 'Business Card', 'category' => 'Business', 'is_premium' => false],
+            ['slug' => 'creator', 'name' => 'Creator', 'category' => 'Creator', 'is_premium' => true],
+            ['slug' => 'influencer', 'name' => 'Influencer', 'category' => 'Social', 'is_premium' => true],
+            ['slug' => 'restaurant', 'name' => 'Restaurant', 'category' => 'Food & Hospitality', 'is_premium' => true],
+            ['slug' => 'real-estate', 'name' => 'Real Estate', 'category' => 'Property', 'is_premium' => true],
+            ['slug' => 'freelancer', 'name' => 'Freelancer', 'category' => 'Creative', 'is_premium' => false],
+            ['slug' => 'consultant', 'name' => 'Consultant', 'category' => 'Business', 'is_premium' => true],
+            ['slug' => 'developer', 'name' => 'Developer', 'category' => 'Technology', 'is_premium' => false],
+            ['slug' => 'agency', 'name' => 'Agency', 'category' => 'Business', 'is_premium' => true],
+            ['slug' => 'personal', 'name' => 'Personal', 'category' => 'Personal', 'is_premium' => false],
+            ['slug' => 'event', 'name' => 'Event', 'category' => 'Events', 'is_premium' => true],
+            ['slug' => 'product', 'name' => 'Product Launch', 'category' => 'E-Commerce', 'is_premium' => true],
+        ];
 
-        $creatorTemplate = Template::firstOrCreate(['slug' => 'creator'], [
-            'name' => 'Creator / Influencer',
-            'category' => 'Creator',
-            'is_premium' => true,
-            'status' => 'active',
-        ]);
-
-        $devTemplate = Template::firstOrCreate(['slug' => 'developer'], [
-            'name' => 'Developer / Freelancer',
-            'category' => 'Developer',
-            'is_premium' => true,
-            'status' => 'active',
-        ]);
+        foreach ($templatesData as $tData) {
+            Template::firstOrCreate(['slug' => $tData['slug']], [
+                'name' => $tData['name'],
+                'category' => $tData['category'],
+                'is_premium' => $tData['is_premium'],
+                'status' => 'active',
+            ]);
+        }
 
         // 3. Seed Admin User
         $admin = User::firstOrCreate(['email' => 'admin@qrsocialsaas.com'], [
