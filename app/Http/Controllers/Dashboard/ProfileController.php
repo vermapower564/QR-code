@@ -27,7 +27,8 @@ class ProfileController extends Controller
             ->withCount('scans')
             ->with('qrCode')
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('dashboard.profiles.index', compact('profiles'));
     }

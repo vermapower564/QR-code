@@ -76,7 +76,9 @@
                                 </form>
                             </div>
                         </div>
-                    @endforeach
+                </div>
+                <div class="mt-4">
+                    {{ $domains->links('vendor.pagination.custom') }}
                 </div>
             @else
                 <p class="text-xs text-slate-500 text-center py-6">No custom domains connected yet.</p>

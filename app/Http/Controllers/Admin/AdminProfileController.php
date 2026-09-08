@@ -26,7 +26,7 @@ class AdminProfileController extends Controller
             $query->where('status', $request->status);
         }
 
-        $profiles = $query->latest()->paginate(15);
+        $profiles = $query->latest()->paginate(15)->withQueryString();
         return view('admin.profiles.index', compact('profiles'));
     }
 

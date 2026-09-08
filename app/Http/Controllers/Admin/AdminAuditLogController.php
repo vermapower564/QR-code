@@ -26,7 +26,7 @@ class AdminAuditLogController extends Controller
             $query->where('action', $request->action);
         }
 
-        $logs = $query->latest()->paginate(25);
+        $logs = $query->latest()->paginate(25)->withQueryString();
         return view('admin.audit_logs.index', compact('logs'));
     }
 }

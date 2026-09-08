@@ -19,7 +19,7 @@ class DomainController extends Controller
         $user = $request->user();
         $hasFeature = $this->featureService->canUseFeature($user, 'custom_domain');
 
-        $domains = CustomDomain::where('user_id', $user->id)->latest()->get();
+        $domains = CustomDomain::where('user_id', $user->id)->latest()->paginate(15)->withQueryString();
 
         return view('dashboard.domains.index', compact('domains', 'hasFeature'));
     }

@@ -30,7 +30,7 @@ class AdminUserController extends Controller
             $query->where('plan_id', $request->plan_id);
         }
 
-        $users = $query->latest()->paginate(15);
+        $users = $query->latest()->paginate(15)->withQueryString();
         $plans = Plan::all();
 
         return view('admin.users.index', compact('users', 'plans'));

@@ -10,7 +10,7 @@ class AdminPaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::with(['user', 'subscription'])->latest()->paginate(15);
+        $payments = Payment::with(['user', 'subscription'])->latest()->paginate(15)->withQueryString();
         return view('admin.payments.index', compact('payments'));
     }
 }

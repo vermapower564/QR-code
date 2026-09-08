@@ -11,7 +11,7 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $notifications = UserNotification::where('user_id', $user->id)->latest()->paginate(15);
+        $notifications = UserNotification::where('user_id', $user->id)->latest()->paginate(15)->withQueryString();
         $unreadCount = UserNotification::where('user_id', $user->id)->whereNull('read_at')->count();
 
         return view('dashboard.notifications.index', compact('notifications', 'unreadCount'));
