@@ -24,7 +24,6 @@ class PublicProfileController extends Controller
 
     public function show(string $slug, Request $request)
     {
-        // Reserved keyword check
         $reserved = ['admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support', 'about', 'contact', 'settings'];
         if (in_array(strtolower($slug), $reserved)) {
             abort(404);
@@ -46,6 +45,12 @@ class PublicProfileController extends Controller
         $this->analyticsService->recordScan($profile, $request);
 
         return view('profile.show', compact('profile'));
+    }
+
+    public function showBooking(string $slug)
+    {
+        $profile = QRProfile::where('slug', strtolower($slug))->firstOrFail();
+        return view('profile.booking', compact('profile'));
     }
 
     public function downloadContact(string $slug, Request $request)

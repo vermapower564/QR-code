@@ -13,39 +13,104 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// In-Memory Database for Live Preview
+// 3 Realistic System Profiles
 let profiles = [
     {
         id: 1,
         slug: 'john-doe',
         name: 'John Doe',
-        designation: 'CEO & Co-founder',
+        designation: 'CEO & Founder',
         company: 'ABC Technologies',
-        bio: 'Technology entrepreneur building next-gen web & cloud solutions.',
+        bio: 'Technology entrepreneur helping businesses build modern digital solutions.',
         phone: '+1 999 999 9999',
-        email: 'john@example.com',
-        website: 'https://example.com',
+        email: 'john@abctechnologies.com',
+        website: 'https://abctechnologies.com',
         status: 'active',
         theme_data: {
             bg_color: '#f8fafc',
             text_color: '#0f172a',
             button_style: 'rounded-xl',
-            theme_preset: 'Classic'
+            theme_preset: 'Business'
         },
-        scans_count: 1240,
+        scans_count: 124,
         social_links: [
-            { id: 101, platform: 'instagram', title: 'Instagram Portfolio', url: 'https://instagram.com/example' },
-            { id: 102, platform: 'linkedin', title: 'LinkedIn Profile', url: 'https://linkedin.com/in/example' },
-            { id: 103, platform: 'youtube', title: 'YouTube Channel', url: 'https://youtube.com/c/example' }
+            { id: 101, platform: 'website', title: 'Company Website', url: 'https://abctechnologies.com' },
+            { id: 102, platform: 'linkedin', title: 'LinkedIn', url: 'https://linkedin.com/in/johndoe' },
+            { id: 103, platform: 'instagram', title: 'Instagram', url: 'https://instagram.com/johndoe' },
+            { id: 104, platform: 'youtube', title: 'YouTube', url: 'https://youtube.com/@johndoetech' },
+            { id: 105, platform: 'whatsapp', title: 'WhatsApp', url: 'https://wa.me/19999999999' }
         ],
         custom_links: [
-            { id: 201, title: 'Book a Meeting', description: 'Schedule 30-min strategy call on Calendly', url: 'https://calendly.com/example' }
+            { id: 201, title: 'Book a Meeting', description: 'Schedule a 30-min strategy call on Calendly', url: 'https://calendly.com/johndoe' },
+            { id: 202, title: 'Company Website', description: 'Explore ABC Technologies solutions & services', url: 'https://abctechnologies.com' },
+            { id: 203, title: 'Our Services', description: 'Enterprise software, web applications & cloud development', url: 'https://abctechnologies.com/services' },
+            { id: 204, title: 'Contact Us', description: 'Get in touch with our sales & consulting team', url: 'https://abctechnologies.com/contact' }
+        ]
+    },
+    {
+        id: 2,
+        slug: 'sarah-sharma',
+        name: 'Sarah Sharma',
+        designation: 'Content Creator',
+        company: 'Independent Creator',
+        bio: 'Sharing technology, productivity and creative content.',
+        phone: '+91 98765 43210',
+        email: 'sarah@creatorstudio.com',
+        website: 'https://youtube.com/@sarahsharma',
+        status: 'active',
+        theme_data: {
+            bg_color: '#faf5ff',
+            text_color: '#3b0764',
+            button_style: 'rounded-full',
+            theme_preset: 'Creator'
+        },
+        scans_count: 860,
+        social_links: [
+            { id: 106, platform: 'instagram', title: 'Instagram', url: 'https://instagram.com/sarahsharma' },
+            { id: 107, platform: 'youtube', title: 'YouTube Channel', url: 'https://youtube.com/@sarahsharma' },
+            { id: 108, platform: 'tiktok', title: 'TikTok', url: 'https://tiktok.com/@sarahsharma' },
+            { id: 109, platform: 'twitter', title: 'X / Twitter', url: 'https://twitter.com/sarahsharma' },
+            { id: 110, platform: 'threads', title: 'Threads', url: 'https://threads.net/@sarahsharma' }
+        ],
+        custom_links: [
+            { id: 205, title: 'Latest Video', description: 'Watch my latest video on YouTube', url: 'https://youtube.com/watch?v=demo' },
+            { id: 206, title: 'My Newsletter', description: 'Weekly tech & productivity digest', url: 'https://sarahsharma.substack.com' },
+            { id: 207, title: 'YouTube Channel', description: 'Subscribe for weekly tutorials & reviews', url: 'https://youtube.com/@sarahsharma' },
+            { id: 208, title: 'Collaboration', description: 'Sponsorships, speaking & brand partnerships', url: 'mailto:sarah@creatorstudio.com' }
+        ]
+    },
+    {
+        id: 3,
+        slug: 'alex-verma',
+        name: 'Alex Verma',
+        designation: 'Full-Stack Developer',
+        company: 'Independent Developer',
+        bio: 'Building scalable web applications and digital products.',
+        phone: '+91 99988 87776',
+        email: 'alex@vermacode.dev',
+        website: 'https://vermacode.dev',
+        status: 'active',
+        theme_data: {
+            bg_color: '#0f172a',
+            text_color: '#f8fafc',
+            button_style: 'rounded-xl',
+            theme_preset: 'Dark'
+        },
+        scans_count: 450,
+        social_links: [
+            { id: 111, platform: 'github', title: 'GitHub Profile', url: 'https://github.com/alexverma' },
+            { id: 112, platform: 'linkedin', title: 'LinkedIn', url: 'https://linkedin.com/in/alexverma' },
+            { id: 113, platform: 'website', title: 'Portfolio', url: 'https://vermacode.dev' },
+            { id: 114, platform: 'youtube', title: 'Coding Tutorials', url: 'https://youtube.com/@alexvermacode' },
+            { id: 115, platform: 'twitter', title: 'X / Twitter', url: 'https://twitter.com/alexvermacode' }
+        ],
+        custom_links: [
+            { id: 209, title: 'View Portfolio', description: 'Explore my full-stack web & API projects', url: 'https://vermacode.dev/portfolio' },
+            { id: 210, title: 'Hire Me', description: 'Available for contract & freelance software projects', url: 'https://vermacode.dev/hire' },
+            { id: 211, title: 'My Projects', description: 'Open source packages & SaaS tools on GitHub', url: 'https://github.com/alexverma' },
+            { id: 212, title: 'Download Resume', description: 'Full-Stack Software Engineer CV (PDF)', url: 'https://vermacode.dev/resume.pdf' }
         ]
     }
-];
-
-let scans = [
-    { id: 1, profile_id: 1, scanned_at: new Date(), ip_hash: 'hash_123', device: 'Mobile', browser: 'Chrome' }
 ];
 
 function htmlWrapper(title, content) {
@@ -88,7 +153,7 @@ app.get('/', (req, res) => {
 
     <section class="py-20 text-center bg-gradient-to-b from-sky-50 to-white px-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold uppercase mb-6">
-            <i class="fa-solid fa-bolt"></i> Dynamic QR Code & Profile Server Running
+            <i class="fa-solid fa-bolt"></i> Live Development Web Server Running
         </div>
         <h1 class="text-4xl sm:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight text-slate-900">
             Create your digital identity. <br/>
@@ -99,11 +164,14 @@ app.get('/', (req, res) => {
         </p>
 
         <div class="mt-10 flex flex-wrap justify-center gap-4">
-            <a href="/dashboard" class="px-8 py-4 bg-sky-600 text-white font-bold rounded-2xl shadow-lg hover:bg-sky-700 transition">
-                Create Your QR Profile <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+            <a href="/p/john-doe" target="_blank" class="px-6 py-3.5 bg-sky-600 text-white font-bold rounded-2xl shadow-lg hover:bg-sky-700 transition">
+                Ex 1: John Doe (Business)
             </a>
-            <a href="/p/john-doe" target="_blank" class="px-8 py-4 bg-slate-100 text-slate-800 font-bold rounded-2xl hover:bg-slate-200 transition">
-                View Live Demo Profile
+            <a href="/p/sarah-sharma" target="_blank" class="px-6 py-3.5 bg-purple-600 text-white font-bold rounded-2xl shadow-lg hover:bg-purple-700 transition">
+                Ex 2: Sarah Sharma (Creator)
+            </a>
+            <a href="/p/alex-verma" target="_blank" class="px-6 py-3.5 bg-slate-900 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-800 transition">
+                Ex 3: Alex Verma (Freelancer)
             </a>
         </div>
     </section>
@@ -149,7 +217,6 @@ app.get('/p/:slug', (req, res) => {
         `));
     }
 
-    scans.push({ id: scans.length + 1, profile_id: profile.id, scanned_at: new Date(), ip_hash: 'demo_hash', device: 'Mobile', browser: 'Chrome' });
     profile.scans_count++;
 
     const bg = profile.theme_data.bg_color || '#f8fafc';
@@ -201,7 +268,7 @@ app.get('/p/:slug', (req, res) => {
             ${profile.social_links.map(l => `
                 <a href="${l.url}" target="_blank" class="w-full p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between font-bold text-sm text-slate-900 shadow-sm hover:translate-y-[-2px] transition">
                     <div class="flex items-center gap-3">
-                        <i class="fa-brands fa-${l.platform} text-xl text-sky-600"></i>
+                        <i class="fa-brands fa-${l.platform === 'website' ? 'globe' : l.platform} text-xl text-sky-600"></i>
                         <span>${l.title}</span>
                     </div>
                     <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
@@ -231,7 +298,61 @@ app.get('/p/:slug', (req, res) => {
 </html>`);
 });
 
-// 4. Contact Card (.vcf Download)
+// 4. Calendly-Style Empty Openings Page (/p/:slug/booking)
+app.get('/p/:slug/booking', (req, res) => {
+    const profile = profiles.find(p => p.slug === req.params.slug) || profiles[0];
+
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Openings - ${profile.name}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col justify-between p-6">
+    <div class="max-w-md w-full mx-auto my-auto py-12 text-center" x-data="{ copied: false }">
+        <div class="mb-6">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-md mb-3">
+                <i class="fa-solid fa-calendar-xmark"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-600">${profile.name}</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xl">
+            <div class="w-14 h-14 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center font-bold text-xl mx-auto mb-4">
+                <i class="fa-solid fa-clock font-normal"></i>
+            </div>
+
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">No openings at the moment.</h2>
+
+            <p class="text-sm text-slate-500 mt-2 max-w-xs mx-auto leading-relaxed">
+                There are currently no available time slots or schedule openings. Please check again later.
+            </p>
+
+            <div class="mt-8 space-y-3">
+                <a href="/p/${profile.slug}" class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl block shadow-md shadow-sky-500/20 transition">
+                    <i class="fa-solid fa-arrow-left text-xs mr-2"></i> Back to Profile
+                </a>
+
+                <button @click="navigator.clipboard.writeText(window.location.origin + '/p/${profile.slug}'); copied = true; setTimeout(() => copied = false, 2000)" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl block transition">
+                    <i class="fa-solid fa-copy text-xs mr-2"></i>
+                    <span x-text="copied ? 'Link Copied!' : 'Copy Profile Link'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-xs text-slate-400">
+        Powered by <a href="/" class="font-bold underline">QR Identity</a>
+    </footer>
+</body>
+</html>`);
+});
+
+// 5. Contact Card (.vcf Download)
 app.get('/p/:slug/contact', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
     if (!profile) return res.status(404).send("Not Found");
@@ -252,10 +373,9 @@ END:VCARD`;
     res.send(vcf);
 });
 
-// 5. Dashboard Overview (/dashboard)
+// 6. Dashboard Overview (/dashboard)
 app.get('/dashboard', (req, res) => {
-    const profile = profiles[0];
-    res.send(htmlWrapper('Dashboard', `
+    res.send(htmlWrapper('Dashboard Overview', `
     <div class="min-h-screen flex bg-slate-100">
         <aside class="w-64 bg-slate-900 text-slate-300 p-6 flex flex-col justify-between hidden md:flex">
             <div>
@@ -267,7 +387,9 @@ app.get('/dashboard', (req, res) => {
                 </div>
                 <nav class="space-y-2 font-medium text-sm">
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 bg-sky-600 text-white rounded-xl"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-                    <a href="/p/john-doe" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Preview Profile</a>
+                    <a href="/p/john-doe" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 1: John Doe</a>
+                    <a href="/p/sarah-sharma" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 2: Sarah Sharma</a>
+                    <a href="/p/alex-verma" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 3: Alex Verma</a>
                 </nav>
             </div>
             <a href="/" class="text-sm font-semibold text-rose-400"><i class="fa-solid fa-right-from-bracket mr-2"></i> Exit Server</a>
@@ -276,7 +398,6 @@ app.get('/dashboard', (req, res) => {
         <main class="flex-1 p-8 max-w-6xl">
             <div class="flex items-center justify-between mb-8">
                 <h1 class="text-2xl font-bold">Dashboard Overview</h1>
-                <a href="/p/${profile.slug}" target="_blank" class="px-4 py-2 bg-sky-600 text-white rounded-xl font-bold text-sm shadow">View Public Profile</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -286,7 +407,7 @@ app.get('/dashboard', (req, res) => {
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <span class="text-xs font-bold text-slate-500 uppercase">Total Scans</span>
-                    <p class="text-3xl font-black mt-2">${profile.scans_count}</p>
+                    <p class="text-3xl font-black mt-2">1,434</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <span class="text-xs font-bold text-slate-500 uppercase">Unique Visitors</span>
@@ -298,29 +419,23 @@ app.get('/dashboard', (req, res) => {
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200">
-                    <h3 class="font-bold text-lg mb-4">Active Profile Card</h3>
-                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-4">
+            <h3 class="font-bold text-lg mb-4">System Example Profiles</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                ${profiles.map(p => `
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
                             <div class="w-12 h-12 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xl">
-                                ${profile.name.charAt(0)}
+                                ${p.name.charAt(0)}
                             </div>
                             <div>
-                                <h4 class="font-bold text-slate-900">${profile.name}</h4>
-                                <a href="/p/${profile.slug}" target="_blank" class="text-xs font-mono text-sky-600 hover:underline">/p/${profile.slug}</a>
+                                <h4 class="font-bold text-slate-900">${p.name}</h4>
+                                <p class="text-xs text-slate-500">${p.designation}</p>
                             </div>
                         </div>
-                        <a href="/api/qr/${profile.slug}" download="qr-${profile.slug}.png" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">Download PNG</a>
+                        <a href="/p/${p.slug}" target="_blank" class="block text-center py-2 bg-sky-600 text-white text-xs font-bold rounded-xl mb-2">View Profile Card</a>
+                        <a href="/api/qr/${p.slug}" download="qr-${p.slug}.png" class="block text-center py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">Download QR PNG</a>
                     </div>
-                </div>
-
-                <div class="bg-slate-900 text-white p-6 rounded-2xl text-center">
-                    <h3 class="font-bold text-sm text-slate-300 mb-4">DYNAMIC QR PREVIEW</h3>
-                    <img src="/api/qr/${profile.slug}" alt="QR" class="w-48 h-48 mx-auto bg-white p-2 rounded-xl mb-4 shadow"/>
-                    <p class="font-bold">${profile.name}</p>
-                    <p class="text-xs text-sky-400 font-mono mt-1">/p/${profile.slug}</p>
-                </div>
+                `).join('')}
             </div>
         </main>
     </div>
