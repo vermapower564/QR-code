@@ -15,7 +15,7 @@
                 </a>
             </div>
 
-            <form action="{{ route('dashboard.profiles.update', $profile->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('dashboard.profiles.update', $profile->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="{ phone: '{{ old('phone', $profile->phone) }}' }">
                 @csrf
                 @method('PUT')
 
@@ -45,7 +45,10 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Phone</label>
-                        <input type="text" name="phone" value="{{ old('phone', $profile->phone) }}" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none"/>
+                        <input type="text" name="phone" x-model="phone" @input="phone = phone.replace(/[^0-9]/g, '').slice(0, 10)" maxlength="10" pattern="[0-9]{10}" placeholder="9876543210" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none" :class="{'border-rose-400 focus:ring-rose-500': phone && phone.length !== 10}"/>
+                        <p x-show="phone && phone.length !== 10" class="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i> Mobile number must be strictly 10 digits (0-9).
+                        </p>
                     </div>
 
                     <div>
@@ -80,7 +83,7 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition">Save Details</button>
+                    <button type="submit" :disabled="phone && phone.length !== 10" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 disabled:opacity-50 transition">Save Details</button>
                 </div>
             </form>
         </div>

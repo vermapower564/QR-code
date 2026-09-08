@@ -22,7 +22,7 @@ let profiles = [
         designation: 'CEO & Founder',
         company: 'ABC Technologies',
         bio: 'Technology entrepreneur helping businesses build modern digital solutions.',
-        phone: '+1 999 999 9999',
+        phone: '9999999999',
         email: 'john@abctechnologies.com',
         website: 'https://abctechnologies.com',
         status: 'active',
@@ -49,7 +49,7 @@ let profiles = [
         designation: 'Content Creator',
         company: 'Independent Creator',
         bio: 'Sharing technology, productivity and creative content.',
-        phone: '+91 98765 43210',
+        phone: '9876543210',
         email: 'sarah@creatorstudio.com',
         website: 'https://youtube.com/@sarahsharma',
         status: 'active',
@@ -76,7 +76,7 @@ let profiles = [
         designation: 'Full-Stack Developer',
         company: 'Independent Developer',
         bio: 'Building scalable web applications and digital products.',
-        phone: '+91 99988 87776',
+        phone: '9998887776',
         email: 'alex@vermacode.dev',
         website: 'https://vermacode.dev',
         status: 'active',
@@ -368,7 +368,7 @@ app.get('/register', (req, res) => {
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone</label>
-                        <input type="text" name="phone" placeholder="+123456789" class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                        <input type="text" name="phone" placeholder="9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full p-3 rounded-xl border text-sm outline-none"/>
                     </div>
                 </div>
                 <div>
@@ -531,7 +531,7 @@ app.post('/onboarding', (req, res) => {
             designation: req.body.designation || 'Creator',
             company: req.body.company || 'Independent',
             bio: req.body.bio || 'Dynamic QR Profile',
-            phone: '+1 800 555 0199',
+            phone: '9800555019',
             email: 'creator@example.com',
             website: 'https://example.com',
             status: 'active',

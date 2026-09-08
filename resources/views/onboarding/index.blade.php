@@ -34,8 +34,10 @@
                  submitting: false,
                  name: '{{ old('name', $existingProfile->name ?? Auth::user()->name) }}',
                  username: '{{ old('username', $existingProfile->slug ?? '') }}',
+                 phone: '{{ old('phone', $existingProfile->phone ?? Auth::user()->phone) }}',
                  canGoNext() {
                      if (this.step === 1) return this.name.trim() !== '' && this.username.trim() !== '';
+                     if (this.step === 3 && this.phone && this.phone.length !== 10) return false;
                      return true;
                  },
                  nextStep() {
@@ -119,7 +121,10 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone</label>
-                            <input type="text" name="phone" value="{{ old('phone', $existingProfile->phone ?? Auth::user()->phone) }}" placeholder="+1 999 999 9999" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                            <input type="text" name="phone" x-model="phone" @input="phone = phone.replace(/[^0-9]/g, '').slice(0, 10)" maxlength="10" pattern="[0-9]{10}" placeholder="9876543210" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition" :class="{'border-rose-400 focus:ring-rose-500': phone && phone.length !== 10}"/>
+                            <p x-show="phone && phone.length !== 10" class="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i> Mobile number must be strictly 10 digits (0-9).
+                            </p>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>

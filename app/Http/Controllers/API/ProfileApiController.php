@@ -28,9 +28,11 @@ class ProfileApiController extends Controller
             'slug' => 'required|string|alpha_dash|unique:qr_profiles,slug',
             'designation' => 'nullable|string',
             'company' => 'nullable|string',
-            'phone' => 'nullable|string',
+            'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => 'nullable|email',
             'website' => 'nullable|url',
+        ], [
+            'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ]);
 
         $profile = $request->user()->qrProfiles()->create([
@@ -63,9 +65,11 @@ class ProfileApiController extends Controller
             'name' => 'sometimes|string|max:255',
             'designation' => 'nullable|string',
             'company' => 'nullable|string',
-            'phone' => 'nullable|string',
+            'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => 'nullable|email',
             'website' => 'nullable|url',
+        ], [
+            'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ]);
 
         $profile->update($request->only(['name', 'designation', 'company', 'phone', 'email', 'website']));

@@ -55,10 +55,12 @@ class OnboardingController extends Controller
             'designation' => ['nullable', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:1000'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'url', 'max:255'],
             'template_id' => ['nullable', 'exists:templates,id'],
+        ], [
+            'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ]);
 
         $reserved = ['admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support', 'about', 'contact', 'settings', 'onboarding'];

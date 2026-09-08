@@ -59,7 +59,9 @@ class BulkImportController extends Controller
             $designation = $this->linkValidator->sanitizeCsvCell($data['designation'] ?? '');
             $company = $this->linkValidator->sanitizeCsvCell($data['company'] ?? '');
             $email = $this->linkValidator->sanitizeCsvCell($data['email'] ?? '');
-            $phone = $this->linkValidator->sanitizeCsvCell($data['phone'] ?? '');
+            $rawPhone = $this->linkValidator->sanitizeCsvCell($data['phone'] ?? '');
+            $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+            $phone = (strlen($cleanPhone) === 10) ? $cleanPhone : '';
             $website = $this->linkValidator->sanitizeCsvCell($data['website'] ?? '');
 
             $slugBase = Str::slug($name);

@@ -19,6 +19,7 @@
          bioMax: 500,
          canGoNext() {
              if (this.step === 1) return this.name.trim() !== '' && this.username.trim() !== '';
+             if (this.step === 2 && this.phone && this.phone.length !== 10) return false;
              return true;
          },
          nextStep() {
@@ -113,7 +114,10 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Phone Number</label>
-                    <input type="text" name="phone" x-model="phone" value="{{ old('phone') }}" placeholder="+1 234 567 8900" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    <input type="text" name="phone" x-model="phone" @input="phone = phone.replace(/[^0-9]/g, '').slice(0, 10)" maxlength="10" pattern="[0-9]{10}" placeholder="9876543210" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition" :class="{'border-rose-400 focus:ring-rose-500': phone && phone.length !== 10}"/>
+                    <p x-show="phone && phone.length !== 10" class="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation"></i> Mobile number must be strictly 10 digits (0-9).
+                    </p>
                 </div>
 
                 <div>
