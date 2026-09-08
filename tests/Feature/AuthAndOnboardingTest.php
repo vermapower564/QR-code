@@ -17,19 +17,32 @@ class AuthAndOnboardingTest extends TestCase
         $this->assertTrue(true);
     }
 
+    public function test_email_normalization_and_password_hashing(): void
+    {
+        $rawEmail = "  ROUSHAN@GMAIL.COM  ";
+        $normalizedEmail = strtolower(trim($rawEmail));
+
+        $this->assertEquals('roushan@gmail.com', $normalizedEmail);
+
+        $password = "Roushan@123";
+        $hashed = Hash::make($password);
+
+        $this->assertTrue(Hash::check('Roushan@123', $hashed));
+    }
+
     public function test_user_can_register_and_receive_default_free_plan(): void
     {
         $freePlan = new Plan(['slug' => 'free', 'name' => 'Starter Free', 'profile_limit' => 1]);
         $user = new User([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Roushan@123'),
             'onboarding_completed' => false,
         ]);
 
         $this->assertEquals('Test User', $user->name);
         $this->assertFalse($user->onboarding_completed);
-        $this->assertTrue(Hash::check('password123', $user->password));
+        $this->assertTrue(Hash::check('Roushan@123', $user->password));
     }
 
     public function test_onboarding_requires_profile_and_qr_before_setting_completed(): void

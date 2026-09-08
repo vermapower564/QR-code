@@ -4,13 +4,38 @@
 
 @section('content')
 <div class="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-200">
+    <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-200"
+         x-data="{ 
+            submitting: false, 
+            showPassword: false, 
+            showConfirmPassword: false,
+            password: '',
+            get strength() {
+                if (!this.password) return { label: '', color: '', percent: 0 };
+                let score = 0;
+                if (this.password.length >= 8) score++;
+                if (/[A-Z]/.test(this.password)) score++;
+                if (/[a-z]/.test(this.password)) score++;
+                if (/[0-9]/.test(this.password)) score++;
+                if (/[^A-Za-z0-9]/.test(this.password)) score++;
+
+                if (score <= 2) return { label: 'Weak', color: 'bg-rose-500 text-rose-700', percent: 33 };
+                if (score <= 4) return { label: 'Medium', color: 'bg-amber-500 text-amber-700', percent: 66 };
+                return { label: 'Strong', color: 'bg-emerald-500 text-emerald-700', percent: 100 };
+            }
+         }">
         <div class="text-center mb-8">
             <h2 class="text-2xl font-black text-slate-900">Reset Password</h2>
             <p class="text-xs text-slate-500 mt-1">Enter your new password below.</p>
         </div>
 
-        <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
+        @if($errors->any())
+            <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3.5 rounded-xl font-semibold">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form action="{{ route('password.update') }}" method="POST" @submit="submitting = true" class="space-y-4">
             @csrf
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
@@ -21,16 +46,37 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">New Password</label>
-                <input type="password" name="password" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                <div class="relative">
+                    <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" required placeholder="Minimum 8 chars (e.g. Roushan@123)" class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm p-1 focus:outline-none" aria-label="Toggle Password Visibility">
+                        <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
+
+                <div x-show="password.length > 0" class="mt-2 space-y-1" x-transition>
+                    <div class="flex items-center justify-between text-[11px] font-bold">
+                        <span class="text-slate-500">Password Strength:</span>
+                        <span :class="strength.color" x-text="strength.label" class="px-1.5 py-0.5 rounded"></span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                        <div class="h-full transition-all duration-300" :class="strength.color" :style="`width: ${strength.percent}%`"></div>
+                    </div>
+                </div>
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Confirm New Password</label>
-                <input type="password" name="password_confirmation" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                <div class="relative">
+                    <input :type="showConfirmPassword ? 'text' : 'password'" name="password_confirmation" required class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm p-1 focus:outline-none" aria-label="Toggle Confirm Password Visibility">
+                        <i class="fa-solid" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" class="w-full py-3.5 px-4 font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-md transition text-sm">
-                Reset Password
+            <button type="submit" :disabled="submitting" class="w-full py-3.5 px-4 font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-50 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2">
+                <span x-show="!submitting">Reset Password</span>
+                <span x-show="submitting"><i class="fa-solid fa-circle-notch fa-spin"></i> Resetting Password...</span>
             </button>
         </form>
     </div>

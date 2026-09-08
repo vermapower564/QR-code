@@ -331,19 +331,77 @@ let currentUser = {
 app.get('/register', (req, res) => {
     res.send(htmlWrapper('Create Account', `
     <div class="min-h-[85vh] flex items-center justify-center py-12 px-4">
-        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+        <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-200 text-center"
+             x-data="{ 
+                submitting: false, 
+                showPassword: false, 
+                showConfirmPassword: false,
+                password: '',
+                get strength() {
+                    if (!this.password) return { label: '', color: '', percent: 0 };
+                    let score = 0;
+                    if (this.password.length >= 8) score++;
+                    if (/[A-Z]/.test(this.password)) score++;
+                    if (/[a-z]/.test(this.password)) score++;
+                    if (/[0-9]/.test(this.password)) score++;
+                    if (/[^A-Za-z0-9]/.test(this.password)) score++;
+                    if (score <= 2) return { label: 'Weak', color: 'bg-rose-500 text-rose-700', percent: 33 };
+                    if (score <= 4) return { label: 'Medium', color: 'bg-amber-500 text-amber-700', percent: 66 };
+                    return { label: 'Strong', color: 'bg-emerald-500 text-emerald-700', percent: 100 };
+                }
+             }">
             <h2 class="text-2xl font-black mb-1">Create your account</h2>
             <p class="text-xs text-slate-500 mb-6">Create your digital profile and generate your dynamic QR code.</p>
-            <form action="/register" method="POST" class="space-y-4 text-left">
-                <input type="text" name="name" placeholder="Full Name *" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="email" name="email" placeholder="Email Address *" required class="w-full p-3 rounded-xl border text-sm"/>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" name="company" placeholder="Company (Optional)" class="w-full p-3 rounded-xl border text-sm"/>
-                    <input type="text" name="phone" placeholder="Phone (Optional)" class="w-full p-3 rounded-xl border text-sm"/>
+            <form action="/register" method="POST" @submit="submitting = true" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                    <input type="text" name="name" placeholder="e.g. John Doe" required class="w-full p-3 rounded-xl border text-sm outline-none"/>
                 </div>
-                <input type="password" name="password" placeholder="Password *" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="password" name="password_confirmation" placeholder="Confirm Password *" required class="w-full p-3 rounded-xl border text-sm"/>
-                <button type="submit" class="w-full text-center py-3.5 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Create Account</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                    <input type="email" name="email" placeholder="john@example.com" required class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Company</label>
+                        <input type="text" name="company" placeholder="ABC Corp" class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone</label>
+                        <input type="text" name="phone" placeholder="+123456789" class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" required placeholder="e.g. Roushan@123" class="w-full p-3 pr-10 rounded-xl border text-sm outline-none"/>
+                        <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm">
+                            <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+                    <div x-show="password.length > 0" class="mt-2 space-y-1" x-transition>
+                        <div class="flex items-center justify-between text-[11px] font-bold">
+                            <span class="text-slate-500">Password Strength:</span>
+                            <span :class="strength.color" x-text="strength.label" class="px-1.5 py-0.5 rounded"></span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="h-full transition-all duration-300" :class="strength.color" :style="\`width: \${strength.percent}%\`"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm Password *</label>
+                    <div class="relative">
+                        <input :type="showConfirmPassword ? 'text' : 'password'" name="password_confirmation" required placeholder="Re-enter password" class="w-full p-3 pr-10 rounded-xl border text-sm outline-none"/>
+                        <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm">
+                            <i class="fa-solid" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" :disabled="submitting" class="w-full py-3.5 bg-sky-600 text-white font-bold rounded-xl text-sm shadow disabled:opacity-50 flex items-center justify-center gap-2">
+                    <span x-show="!submitting">Create Account</span>
+                    <span x-show="submitting"><i class="fa-solid fa-circle-notch fa-spin"></i> Creating Account...</span>
+                </button>
             </form>
             <p class="text-xs text-slate-600 mt-6">Already have an account? <a href="/login" class="font-bold text-sky-600">Log in</a></p>
         </div>
@@ -372,13 +430,27 @@ app.get('/email/verify', (req, res) => {
 app.get('/login', (req, res) => {
     res.send(htmlWrapper('Log In', `
     <div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
-        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center" x-data="{ submitting: false, showPassword: false }">
             <h2 class="text-2xl font-black mb-1">Welcome Back</h2>
             <p class="text-xs text-slate-500 mb-6">Sign in to manage your QR profiles & analytics</p>
-            <form action="/login" method="POST" class="space-y-4 text-left">
-                <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="password" placeholder="Password" required class="w-full p-3 rounded-xl border text-sm"/>
-                <button type="submit" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Log In</button>
+            <form action="/login" method="POST" @submit="submitting = true" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                    <input type="email" name="email" required placeholder="john@example.com" class="w-full p-3 rounded-xl border text-sm outline-none"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'" name="password" required placeholder="••••••••" class="w-full p-3 pr-10 rounded-xl border text-sm outline-none"/>
+                        <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm">
+                            <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" :disabled="submitting" class="w-full text-center py-3.5 bg-sky-600 text-white font-bold rounded-xl text-sm shadow disabled:opacity-50 flex items-center justify-center gap-2">
+                    <span x-show="!submitting">Login</span>
+                    <span x-show="submitting"><i class="fa-solid fa-circle-notch fa-spin"></i> Signing in...</span>
+                </button>
             </form>
             <div class="flex items-center justify-between text-xs font-semibold mt-4">
                 <a href="/forgot-password" class="text-sky-600">Forgot Password?</a>
