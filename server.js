@@ -126,8 +126,8 @@ function htmlWrapper(title, content) {
             </nav>
             <div class="flex items-center gap-4">
                 <a href="/login" class="text-sm font-semibold text-slate-700 hover:text-slate-900">Sign in</a>
-                <a href="/dashboard" class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-xl hover:bg-sky-700 shadow-sm">
-                    Dashboard
+                <a href="/register" class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-xl hover:bg-sky-700 shadow-sm">
+                    Create Your QR
                 </a>
             </div>
         </div>
@@ -148,7 +148,7 @@ app.get('/', (req, res) => {
     res.send(htmlWrapper('Dynamic QR Social Profile SaaS', `
     <section class="py-20 text-center bg-gradient-to-b from-sky-50 to-white px-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold uppercase mb-6">
-            <i class="fa-solid fa-bolt"></i> Approved Architecture Deployed
+            <i class="fa-solid fa-bolt"></i> Account Creation & Dynamic QR Platform
         </div>
         <h1 class="text-4xl sm:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight text-slate-900">
             Create your digital identity. <br/>
@@ -159,14 +159,11 @@ app.get('/', (req, res) => {
         </p>
 
         <div class="mt-10 flex flex-wrap justify-center gap-4">
-            <a href="/p/john-doe" target="_blank" class="px-6 py-3.5 bg-sky-600 text-white font-bold rounded-2xl shadow-lg hover:bg-sky-700 transition">
-                Ex 1: John Doe (Business)
+            <a href="/register" class="px-8 py-4 bg-sky-600 text-white font-bold rounded-2xl shadow-lg hover:bg-sky-700 transition">
+                Create Your QR <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
             </a>
-            <a href="/p/sarah-sharma" target="_blank" class="px-6 py-3.5 bg-purple-600 text-white font-bold rounded-2xl shadow-lg hover:bg-purple-700 transition">
-                Ex 2: Sarah Sharma (Creator)
-            </a>
-            <a href="/p/alex-verma" target="_blank" class="px-6 py-3.5 bg-slate-900 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-800 transition">
-                Ex 3: Alex Verma (Freelancer)
+            <a href="/p/john-doe" target="_blank" class="px-8 py-4 bg-slate-100 text-slate-800 font-bold rounded-2xl hover:bg-slate-200 transition">
+                View Live Demo Profile
             </a>
         </div>
     </section>
@@ -180,6 +177,76 @@ app.get('/terms', (req, res) => res.send(htmlWrapper('Terms', `<div class="max-w
 app.get('/privacy', (req, res) => res.send(htmlWrapper('Privacy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Privacy Policy</h1></div>`)));
 app.get('/cookie-policy', (req, res) => res.send(htmlWrapper('Cookie Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Cookie Policy</h1></div>`)));
 app.get('/refund-policy', (req, res) => res.send(htmlWrapper('Refund Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Refund Policy</h1></div>`)));
+
+// Registration Page
+app.get('/register', (req, res) => {
+    res.send(htmlWrapper('Create Account', `
+    <div class="min-h-[85vh] flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+            <h2 class="text-2xl font-black mb-1">Create your account</h2>
+            <p class="text-xs text-slate-500 mb-6">Create your digital profile and generate your dynamic QR code.</p>
+            <form action="/register" method="POST" class="space-y-4 text-left">
+                <input type="text" placeholder="Full Name" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="password" placeholder="Password" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="password" placeholder="Confirm Password" required class="w-full p-3 rounded-xl border text-sm"/>
+                <a href="/email/verify" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Create Account</a>
+            </form>
+            <p class="text-xs text-slate-600 mt-6">Already have an account? <a href="/login" class="font-bold text-sky-600">Log in</a></p>
+        </div>
+    </div>
+    `));
+});
+
+app.post('/register', (req, res) => res.redirect('/email/verify'));
+
+// Email Verification Notice Page
+app.get('/email/verify', (req, res) => {
+    res.send(htmlWrapper('Verify Email Address', `
+    <div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+            <h2 class="text-2xl font-black mb-2">Verify your email address</h2>
+            <p class="text-xs text-slate-500 mb-6">Please check your inbox for a verification link.</p>
+            <a href="/dashboard" class="w-full py-3.5 px-4 bg-sky-600 text-white font-bold rounded-xl text-sm block shadow">Resend Verification Email / Continue to Dashboard</a>
+        </div>
+    </div>
+    `));
+});
+
+app.get('/login', (req, res) => {
+    res.send(htmlWrapper('Log In', `
+    <div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+            <h2 class="text-2xl font-black mb-1">Welcome Back</h2>
+            <p class="text-xs text-slate-500 mb-6">Sign in to manage your QR profiles & analytics</p>
+            <form action="/login" method="POST" class="space-y-4 text-left">
+                <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="password" placeholder="Password" required class="w-full p-3 rounded-xl border text-sm"/>
+                <a href="/dashboard" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Log In</a>
+            </form>
+            <div class="flex items-center justify-between text-xs font-semibold mt-4">
+                <a href="/forgot-password" class="text-sky-600">Forgot Password?</a>
+                <a href="/register" class="text-sky-600">Create Account</a>
+            </div>
+        </div>
+    </div>
+    `));
+});
+
+app.get('/forgot-password', (req, res) => {
+    res.send(htmlWrapper('Forgot Password', `
+    <div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+            <h2 class="text-2xl font-black mb-2">Forgot Password</h2>
+            <p class="text-xs text-slate-500 mb-6">Enter your email for a password reset link.</p>
+            <form action="/forgot-password" method="POST" class="space-y-4 text-left">
+                <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
+                <a href="/login" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Send Password Reset Link</a>
+            </form>
+        </div>
+    </div>
+    `));
+});
 
 // Dynamic QR Code API Endpoint
 app.get('/api/qr/:slug', async (req, res) => {
@@ -297,60 +364,6 @@ app.get('/p/:slug', (req, res) => {
 </html>`);
 });
 
-// Empty Openings Page (/p/:slug/booking)
-app.get('/p/:slug/booking', (req, res) => {
-    const profile = profiles.find(p => p.slug === req.params.slug) || profiles[0];
-
-    res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No Openings - ${profile.name}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-</head>
-<body class="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col justify-between p-6">
-    <div class="max-w-md w-full mx-auto my-auto py-12 text-center" x-data="{ copied: false }">
-        <div class="mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-md mb-3">
-                <i class="fa-solid fa-calendar-xmark"></i>
-            </div>
-            <p class="text-sm font-bold text-slate-600">${profile.name}</p>
-        </div>
-
-        <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xl">
-            <div class="w-14 h-14 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center font-bold text-xl mx-auto mb-4">
-                <i class="fa-solid fa-clock font-normal"></i>
-            </div>
-
-            <h2 class="text-xl font-black text-slate-900 tracking-tight">No openings at the moment.</h2>
-
-            <p class="text-sm text-slate-500 mt-2 max-w-xs mx-auto leading-relaxed">
-                There are currently no available time slots or schedule openings. Please check again later.
-            </p>
-
-            <div class="mt-8 space-y-3">
-                <a href="/p/${profile.slug}" class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl block shadow-md shadow-sky-500/20 transition">
-                    <i class="fa-solid fa-arrow-left text-xs mr-2"></i> Back to Profile
-                </a>
-
-                <button @click="navigator.clipboard.writeText(window.location.origin + '/p/${profile.slug}'); copied = true; setTimeout(() => copied = false, 2000)" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl block transition">
-                    <i class="fa-solid fa-copy text-xs mr-2"></i>
-                    <span x-text="copied ? 'Link Copied!' : 'Copy Profile Link'"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <footer class="text-center py-4 text-xs text-slate-400">
-        Powered by <a href="/" class="font-bold underline">QR Identity</a>
-    </footer>
-</body>
-</html>`);
-});
-
 // Contact Card (.vcf Download)
 app.get('/p/:slug/contact', (req, res) => {
     const profile = profiles.find(p => p.slug === req.params.slug);
@@ -387,8 +400,6 @@ app.get('/dashboard', (req, res) => {
                 <nav class="space-y-2 font-medium text-sm">
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 bg-sky-600 text-white rounded-xl"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
                     <a href="/p/john-doe" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 1: John Doe</a>
-                    <a href="/p/sarah-sharma" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 2: Sarah Sharma</a>
-                    <a href="/p/alex-verma" target="_blank" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-slate-400 rounded-xl"><i class="fa-solid fa-id-card"></i> Ex 3: Alex Verma</a>
                 </nav>
             </div>
             <a href="/" class="text-sm font-semibold text-rose-400"><i class="fa-solid fa-right-from-bracket mr-2"></i> Exit Server</a>
@@ -417,32 +428,10 @@ app.get('/dashboard', (req, res) => {
                     <p class="text-3xl font-black mt-2">482</p>
                 </div>
             </div>
-
-            <h3 class="font-bold text-lg mb-4">System Example Profiles</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                ${profiles.map(p => `
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xl">
-                                ${p.name.charAt(0)}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-slate-900">${p.name}</h4>
-                                <p class="text-xs text-slate-500">${p.designation}</p>
-                            </div>
-                        </div>
-                        <a href="/p/${p.slug}" target="_blank" class="block text-center py-2 bg-sky-600 text-white text-xs font-bold rounded-xl mb-2">View Profile Card</a>
-                        <a href="/api/qr/${p.slug}" download="qr-${p.slug}.png" class="block text-center py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">Download QR PNG</a>
-                    </div>
-                `).join('')}
-            </div>
         </main>
     </div>
     `));
 });
-
-app.get('/login', (req, res) => res.redirect('/dashboard'));
-app.get('/register', (req, res) => res.redirect('/dashboard'));
 
 app.listen(PORT, () => {
     console.log(`\n==================================================`);
