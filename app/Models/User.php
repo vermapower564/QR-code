@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role',
         'plan_id',
         'status',
+        'onboarding_completed',
         'email_verified_at',
     ];
 
@@ -31,6 +32,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'onboarding_completed' => 'boolean',
             'password' => 'hashed',
         ];
     }

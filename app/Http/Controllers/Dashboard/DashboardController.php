@@ -15,6 +15,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        if (!$user->onboarding_completed) {
+            return redirect()->route('onboarding.index');
+        }
+
         $profileIds = $user->qrProfiles()->pluck('id');
 
         $totalProfiles = $profileIds->count();

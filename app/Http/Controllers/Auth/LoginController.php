@@ -32,6 +32,10 @@ class LoginController extends Controller
                 return redirect()->intended('/admin');
             }
 
+            if (!Auth::user()->onboarding_completed) {
+                return redirect()->route('onboarding.index');
+            }
+
             return redirect()->intended('/dashboard');
         }
 

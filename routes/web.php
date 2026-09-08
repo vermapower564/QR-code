@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\OnboardingController;
 use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\QRCodeController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
@@ -60,6 +61,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
     Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
+
+    // Onboarding Flow Routes
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::get('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
 });
 
 /*

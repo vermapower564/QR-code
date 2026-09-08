@@ -38,13 +38,14 @@ class RegisterController extends Controller
             'plan_id' => $freePlan ? $freePlan->id : null,
             'role' => 'user',
             'status' => 'active',
+            'onboarding_completed' => false,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('dashboard.index')
-            ->with('success', 'Account created successfully! Welcome to QR Identity. Start by creating your first dynamic profile.');
+        return redirect()->route('onboarding.index')
+            ->with('success', 'Account created successfully! Welcome to QR Identity. Complete your first dynamic profile below.');
     }
 }

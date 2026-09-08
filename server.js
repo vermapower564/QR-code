@@ -178,6 +178,14 @@ app.get('/privacy', (req, res) => res.send(htmlWrapper('Privacy', `<div class="m
 app.get('/cookie-policy', (req, res) => res.send(htmlWrapper('Cookie Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Cookie Policy</h1></div>`)));
 app.get('/refund-policy', (req, res) => res.send(htmlWrapper('Refund Policy', `<div class="max-w-4xl mx-auto py-16 px-4"><h1 class="text-3xl font-bold mb-4">Refund Policy</h1></div>`)));
 
+// Onboarding State
+let currentUser = {
+    id: 99,
+    name: 'New Creator',
+    email: 'newcreator@example.com',
+    onboarding_completed: false
+};
+
 // Registration Page
 app.get('/register', (req, res) => {
     res.send(htmlWrapper('Create Account', `
@@ -186,11 +194,15 @@ app.get('/register', (req, res) => {
             <h2 class="text-2xl font-black mb-1">Create your account</h2>
             <p class="text-xs text-slate-500 mb-6">Create your digital profile and generate your dynamic QR code.</p>
             <form action="/register" method="POST" class="space-y-4 text-left">
-                <input type="text" placeholder="Full Name" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="password" placeholder="Password" required class="w-full p-3 rounded-xl border text-sm"/>
-                <input type="password" placeholder="Confirm Password" required class="w-full p-3 rounded-xl border text-sm"/>
-                <a href="/email/verify" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Create Account</a>
+                <input type="text" name="name" placeholder="Full Name *" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="email" name="email" placeholder="Email Address *" required class="w-full p-3 rounded-xl border text-sm"/>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" name="company" placeholder="Company (Optional)" class="w-full p-3 rounded-xl border text-sm"/>
+                    <input type="text" name="phone" placeholder="Phone (Optional)" class="w-full p-3 rounded-xl border text-sm"/>
+                </div>
+                <input type="password" name="password" placeholder="Password *" required class="w-full p-3 rounded-xl border text-sm"/>
+                <input type="password" name="password_confirmation" placeholder="Confirm Password *" required class="w-full p-3 rounded-xl border text-sm"/>
+                <button type="submit" class="w-full text-center py-3.5 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Create Account</button>
             </form>
             <p class="text-xs text-slate-600 mt-6">Already have an account? <a href="/login" class="font-bold text-sky-600">Log in</a></p>
         </div>
@@ -198,7 +210,10 @@ app.get('/register', (req, res) => {
     `));
 });
 
-app.post('/register', (req, res) => res.redirect('/email/verify'));
+app.post('/register', (req, res) => {
+    currentUser.onboarding_completed = false;
+    res.redirect('/email/verify');
+});
 
 // Email Verification Notice Page
 app.get('/email/verify', (req, res) => {
@@ -207,7 +222,7 @@ app.get('/email/verify', (req, res) => {
         <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
             <h2 class="text-2xl font-black mb-2">Verify your email address</h2>
             <p class="text-xs text-slate-500 mb-6">Please check your inbox for a verification link.</p>
-            <a href="/dashboard" class="w-full py-3.5 px-4 bg-sky-600 text-white font-bold rounded-xl text-sm block shadow">Resend Verification Email / Continue to Dashboard</a>
+            <a href="/onboarding" class="w-full py-3.5 px-4 bg-sky-600 text-white font-bold rounded-xl text-sm block shadow">Resend Verification Email / Continue to Onboarding</a>
         </div>
     </div>
     `));
@@ -222,11 +237,132 @@ app.get('/login', (req, res) => {
             <form action="/login" method="POST" class="space-y-4 text-left">
                 <input type="email" placeholder="Email Address" required class="w-full p-3 rounded-xl border text-sm"/>
                 <input type="password" placeholder="Password" required class="w-full p-3 rounded-xl border text-sm"/>
-                <a href="/dashboard" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Log In</a>
+                <button type="submit" class="block w-full text-center py-3 bg-sky-600 text-white font-bold rounded-xl text-sm shadow">Log In</button>
             </form>
             <div class="flex items-center justify-between text-xs font-semibold mt-4">
                 <a href="/forgot-password" class="text-sky-600">Forgot Password?</a>
                 <a href="/register" class="text-sky-600">Create Account</a>
+            </div>
+        </div>
+    </div>
+    `));
+});
+
+app.post('/login', (req, res) => {
+    if (!currentUser.onboarding_completed) {
+        return res.redirect('/onboarding');
+    }
+    return res.redirect('/dashboard');
+});
+
+// Onboarding Entry Route
+app.get('/onboarding', (req, res) => {
+    if (currentUser.onboarding_completed) {
+        return res.redirect('/dashboard');
+    }
+
+    res.send(htmlWrapper('Complete Your Profile', `
+    <div class="min-h-[85vh] bg-slate-50 py-12 px-4 max-w-2xl mx-auto">
+        <div class="mb-8 text-center">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Step 2 of 2: Create Your First QR Profile
+            </div>
+            <h1 class="text-3xl font-black text-slate-900">Set Up Your Dynamic Identity</h1>
+            <p class="text-sm text-slate-600 mt-1">Fill in your profile details to generate your dynamic QR code.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
+            <form action="/onboarding" method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                    <input type="text" name="name" value="Demo Creator" required class="w-full p-3 rounded-xl border text-sm"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username / Slug *</label>
+                    <div class="flex rounded-xl border overflow-hidden">
+                        <span class="bg-slate-100 text-slate-500 text-xs font-semibold px-3 flex items-center">/p/</span>
+                        <input type="text" name="username" value="demo-creator" required class="w-full p-3 text-sm border-none"/>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Designation</label>
+                        <input type="text" name="designation" value="Product Designer" class="w-full p-3 rounded-xl border text-sm"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Company</label>
+                        <input type="text" name="company" value="Design Studio" class="w-full p-3 rounded-xl border text-sm"/>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Bio</label>
+                    <textarea name="bio" rows="2" class="w-full p-3 rounded-xl border text-sm">Building clean digital products & dynamic QR experiences.</textarea>
+                </div>
+                <button type="submit" class="w-full py-4 bg-sky-600 text-white font-bold text-sm rounded-xl shadow-lg">Save Profile & Generate Dynamic QR</button>
+            </form>
+        </div>
+    </div>
+    `));
+});
+
+app.post('/onboarding', (req, res) => {
+    const slug = req.body.username || 'demo-creator';
+    const name = req.body.name || 'Demo Creator';
+    
+    let existing = profiles.find(p => p.slug === slug);
+    if (!existing) {
+        existing = {
+            id: profiles.length + 1,
+            slug: slug,
+            name: name,
+            designation: req.body.designation || 'Creator',
+            company: req.body.company || 'Independent',
+            bio: req.body.bio || 'Dynamic QR Profile',
+            phone: '+1 800 555 0199',
+            email: 'creator@example.com',
+            website: 'https://example.com',
+            status: 'active',
+            theme_data: { bg_color: '#f8fafc', text_color: '#0f172a', button_style: 'rounded-xl', theme_preset: 'Business' },
+            scans_count: 0,
+            social_links: [
+                { id: 301, platform: 'website', title: 'Website', url: 'https://example.com' }
+            ],
+            custom_links: [
+                { id: 401, title: 'Book Meeting', description: 'Schedule a call', url: 'https://calendly.com' }
+            ]
+        };
+        profiles.push(existing);
+    }
+    
+    currentUser.onboarding_completed = true;
+    res.redirect('/onboarding/complete');
+});
+
+// Onboarding Completion Screen Route
+app.get('/onboarding/complete', (req, res) => {
+    const profile = profiles[profiles.length - 1] || profiles[0];
+
+    res.send(htmlWrapper('Your QR Profile is Ready', `
+    <div class="min-h-[85vh] bg-slate-50 flex items-center justify-center py-12 px-4">
+        <div class="max-w-xl w-full bg-white p-8 rounded-3xl shadow-2xl border border-slate-200 text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 font-black text-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900">Your QR profile is ready.</h1>
+            <p class="text-lg font-bold text-sky-600 mt-1">${profile.name}</p>
+            <p class="text-sm text-slate-500 mt-0.5">Your digital profile is now live.</p>
+
+            <div class="my-8 bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block">
+                <div class="bg-white p-4 rounded-xl shadow-md inline-block">
+                    <img src="/api/qr/${profile.slug}" alt="Dynamic QR Code" class="w-48 h-48 mx-auto"/>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <a href="/p/${profile.slug}" target="_blank" class="py-3 bg-slate-900 text-white font-bold rounded-xl text-sm">View Profile</a>
+                <a href="/api/qr/${profile.slug}" download="${profile.slug}-qr.png" class="py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm">Download QR</a>
+                <a href="#" onclick="alert('Profile link copied: ' + window.location.origin + '/p/${profile.slug}')" class="py-3 bg-slate-100 text-slate-800 font-bold rounded-xl text-sm">Share QR</a>
+                <a href="/dashboard" class="py-3 bg-sky-600 text-white font-bold rounded-xl text-sm">Go to Dashboard</a>
             </div>
         </div>
     </div>

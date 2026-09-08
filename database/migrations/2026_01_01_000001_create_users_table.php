@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('role')->default('user'); // user, admin
             $table->foreignId('plan_id')->nullable()->constrained('plans')->nullOnDelete();
             $table->string('status')->default('active'); // active, suspended
+            $table->boolean('onboarding_completed')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

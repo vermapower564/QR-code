@@ -78,6 +78,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'plan_id' => $bizPlan->id,
             'status' => 'active',
+            'onboarding_completed' => true,
         ]);
 
         // =========================================================================
@@ -89,6 +90,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
             'plan_id' => $bizPlan->id,
             'status' => 'active',
+            'onboarding_completed' => true,
         ]);
 
         $profileJohn = QRProfile::updateOrCreate(
@@ -140,6 +142,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
             'plan_id' => $proPlan->id,
             'status' => 'active',
+            'onboarding_completed' => true,
         ]);
 
         $profileSarah = QRProfile::updateOrCreate(
@@ -191,6 +194,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
             'plan_id' => $proPlan->id,
             'status' => 'active',
+            'onboarding_completed' => true,
         ]);
 
         $profileAlex = QRProfile::updateOrCreate(
