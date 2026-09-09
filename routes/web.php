@@ -14,7 +14,7 @@ use App\Http\Controllers\Dashboard\OnboardingController;
 use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\QRCodeController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
-use App\Http\Controllers\Dashboard\BillingController;
+use App\Http\Controllers\Billing\BillingController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\BulkImportController;
@@ -242,5 +242,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Global Settings
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
-    Route::patch('/settings', [AdminSettingsController::class, 'index']);
+    Route::patch('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });

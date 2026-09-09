@@ -3,32 +3,29 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        $notifications = UserNotification::where('user_id', $user->id)->latest()->paginate(15)->withQueryString();
-        $unreadCount = UserNotification::where('user_id', $user->id)->whereNull('read_at')->count();
+        $notifications = $user->notifications()->latest()->paginate(15);
+        $unreadCount = $user->unreadNotifications()->count();
 
         return view('dashboard.notifications.index', compact('notifications', 'unreadCount'));
     }
 
-    public function markAsRead(Request $request, int $id)
+    public function markAsRead(Request $request, string $id)
     {
         $user = $request->user();
-        $notification = UserNotification::where('user_id', $user->id)->findOrFail($id);
+        $notification = $user->notifications()->findOrFail($id);
 
-        if (is_null($notification->read_at)) {
-            $notification->read_at = now();
-            $notification->save();
-        }
+        $notification->markAsRead();
 
-        if ($notification->action_url) {
-            return redirect()->to($notification->action_url);
+        if (isset($notification->data['action_url'])) {
+            return redirect()->to($notification->data['action_url']);
         }
 
         return back()->with('success', 'Notification marked as read.');
@@ -36,8 +33,7 @@ class NotificationController extends Controller
 
     public function markAllRead(Request $request)
     {
-        $user = $request->user();
-        UserNotification::where('user_id', $user->id)->whereNull('read_at')->update(['read_at' => now()]);
+        $request->user()->unreadNotifications->markAsRead();
 
         return back()->with('success', 'All notifications marked as read.');
     }

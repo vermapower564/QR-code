@@ -24,6 +24,8 @@ class QRProfile extends Model
         'whatsapp',
         'email',
         'website',
+        'seo_title',
+        'seo_description',
         'address',
         'template_id',
         'theme_data',

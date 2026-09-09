@@ -11,6 +11,9 @@ use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Logo\Logo;
+use Endroid\QrCode\Label\Label;
+use Endroid\QrCode\Label\Font\NotoSans;
+use Endroid\QrCode\RoundBlockSizeMode;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -60,14 +63,30 @@ class QRCodeService
                 );
             }
 
-            $result = $writer->write($builder, $logo);
+            // Advanced Feature: Optional Text Label underneath the QR Code
+            $textLabel = $options['label'] ?? null;
+            $qrLabel = null;
+            if ($textLabel) {
+                $qrLabel = new Label(
+                    text: $textLabel,
+                    textColor: new Color($fgRgb['r'], $fgRgb['g'], $fgRgb['b'])
+                );
+            }
+
+            $result = $writer->write($builder, $logo, $qrLabel);
             $qrData = $result->getString();
         } else {
             // Pure SVG fallback if package is loading dynamically
             $qrData = $this->generateFallbackSvg($profileUrl, $fgColor, $bgColor, $size);
         }
 
-        $fileName = 'qr-codes/' . $profile->slug . '_' . time() . '.' . $format;
+        // Cleanup old QR Code file if it exists to save disk space
+        $existingQr = QRCode::where('profile_id', $profile->id)->first();
+        if ($existingQr && $existingQr->file_path && Storage::disk('public')->exists($existingQr->file_path)) {
+            Storage::disk('public')->delete($existingQr->file_path);
+        }
+
+        $fileName = 'qr-codes/' . $profile->slug . '_' . uniqid() . '_' . time() . '.' . $format;
         Storage::disk('public')->put($fileName, $qrData);
 
         return QRCode::updateOrCreate(

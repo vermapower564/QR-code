@@ -29,15 +29,15 @@
                     <div class="p-4 sm:p-5 flex items-start justify-between gap-4 {{ is_null($n->read_at) ? 'bg-sky-50/40 font-semibold' : 'bg-white' }}">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-slate-100 text-slate-600">{{ $n->type ?? 'System' }}</span>
-                                <h3 class="text-sm font-bold text-slate-900">{{ $n->title }}</h3>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-slate-100 text-slate-600">{{ $n->data['type'] ?? 'System' }}</span>
+                                <h3 class="text-sm font-bold text-slate-900">{{ $n->data['title'] ?? 'Notification' }}</h3>
                             </div>
-                            <p class="text-xs text-slate-600 leading-relaxed">{{ $n->message }}</p>
+                            <p class="text-xs text-slate-600 leading-relaxed">{{ $n->data['message'] ?? '' }}</p>
                             <span class="text-[11px] text-slate-400 block pt-1">{{ $n->created_at->diffForHumans() }}</span>
                         </div>
 
                         <div class="flex items-center gap-2 shrink-0">
-                            @if($n->action_url)
+                            @if(!empty($n->data['action_url']))
                                 <form action="{{ route('dashboard.notifications.read', $n->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 bg-sky-600 text-white font-bold text-xs rounded-xl shadow">View</button>

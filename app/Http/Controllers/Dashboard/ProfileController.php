@@ -68,8 +68,10 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'string', 'max:2048'],
-            'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
+            'seo_title' => ['nullable', 'string', 'max:70'],
+            'seo_description' => ['nullable', 'string', 'max:160'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
             'template_id' => ['nullable', 'exists:templates,id'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
@@ -103,6 +105,8 @@ class ProfileController extends Controller
             'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'website' => $request->website,
+            'seo_title' => $request->seo_title,
+            'seo_description' => $request->seo_description,
             'address' => $request->address,
             'profile_image' => $profileImagePath,
             'logo' => $logoPath,
@@ -156,8 +160,10 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'string', 'max:2048'],
-            'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
+            'seo_title' => ['nullable', 'string', 'max:70'],
+            'seo_description' => ['nullable', 'string', 'max:160'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
             'website.url' => 'Please enter a valid website URL.',
@@ -178,6 +184,8 @@ class ProfileController extends Controller
         }
 
         $profile->update([
+            'seo_title' => $request->seo_title,
+            'seo_description' => $request->seo_description,
             'slug' => strtolower($request->username),
             'name' => $request->name,
             'designation' => $request->designation,
@@ -187,6 +195,8 @@ class ProfileController extends Controller
             'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'website' => $request->website,
+            'seo_title' => $request->seo_title,
+            'seo_description' => $request->seo_description,
             'address' => $request->address,
             'template_id' => $request->template_id ?? $profile->template_id,
             'theme_data' => array_merge($profile->theme_data ?? [], [
