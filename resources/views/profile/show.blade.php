@@ -62,65 +62,131 @@
             @endif
         </div>
 
-        <!-- Quick Action Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-8">
-            @if($profile->phone)
-                <a href="tel:{{ $profile->phone }}" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
-                    <i class="fa-solid fa-phone text-emerald-500 text-lg block mb-1"></i>
-                    <span class="text-xs font-bold block">Call</span>
+                <!-- Connect Section -->
+        <div class="space-y-3 mb-8">
+            <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 px-1">Connect</h3>
+
+            @if($profile->website)
+                <a href="{{ $profile->website }}" target="_blank" rel="noopener noreferrer" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-globe text-sky-500 text-xl w-6"></i>
+                        <span>Website</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+                </a>
+            @endif
+
+            @php
+                $socials = $profile->socialLinks->keyBy(function($item) { return strtolower($item->platform); });
+            @endphp
+
+            @if($socials->has('instagram'))
+                <a href="{{ $socials->get('instagram')->url }}" target="_blank" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-instagram text-pink-500 text-xl w-6"></i>
+                        <span>Instagram</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+                </a>
+            @endif
+
+            @if($socials->has('facebook'))
+                <a href="{{ $socials->get('facebook')->url }}" target="_blank" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-facebook text-blue-600 text-xl w-6"></i>
+                        <span>Facebook</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+                </a>
+            @endif
+
+            @if($socials->has('linkedin'))
+                <a href="{{ $socials->get('linkedin')->url }}" target="_blank" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-linkedin text-blue-700 text-xl w-6"></i>
+                        <span>LinkedIn</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+                </a>
+            @endif
+
+            @if($socials->has('youtube'))
+                <a href="{{ $socials->get('youtube')->url }}" target="_blank" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-youtube text-red-600 text-xl w-6"></i>
+                        <span>YouTube</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+                </a>
+            @endif
+
+            @if($profile->whatsapp)
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->whatsapp) }}" target="_blank" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-whatsapp text-emerald-500 text-xl w-6"></i>
+                        <span>WhatsApp</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
                 </a>
             @endif
 
             @if($profile->email)
-                <a href="mailto:{{ $profile->email }}" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
-                    <i class="fa-solid fa-envelope text-sky-500 text-lg block mb-1"></i>
-                    <span class="text-xs font-bold block">Email</span>
-                </a>
-            @endif
-
-            @if($profile->website)
-                <a href="{{ $profile->website }}" target="_blank" rel="noopener noreferrer" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
-                    <i class="fa-solid fa-globe text-sky-500 text-lg block mb-1"></i>
-                    <span class="text-xs font-bold block">Website</span>
+                <a href="mailto:{{ $profile->email }}" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-envelope text-indigo-500 text-xl w-6"></i>
+                        <span>Email</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
                 </a>
             @endif
 
             @if($profile->phone)
-                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->phone) }}" target="_blank" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm">
-                    <i class="fa-brands fa-whatsapp text-emerald-400 text-lg block mb-1"></i>
-                    <span class="text-xs font-bold block">WhatsApp</span>
+                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $profile->phone) }}" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-phone text-emerald-600 text-xl w-6"></i>
+                        <span>Phone</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
                 </a>
             @endif
 
-            <a href="{{ route('profile.contact', $profile->slug) }}" class="bg-white/10 backdrop-blur-md border border-white/20 p-3 {{ $buttonStyle }} text-center hover:scale-105 transition shadow-sm col-span-2 sm:col-span-1">
-                <i class="fa-solid fa-address-book text-indigo-500 text-lg block mb-1"></i>
-                <span class="text-xs font-bold block">Save VCF</span>
+            <a href="{{ route('profile.contact', $profile->slug) }}" class="w-full p-4 bg-white/80 border border-slate-200/80 {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-sm hover:translate-y-[-2px] transition text-slate-900">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-user-plus text-sky-600 text-xl w-6"></i>
+                    <span>Save Contact</span>
+                </div>
+                <i class="fa-solid fa-download text-xs opacity-40"></i>
             </a>
         </div>
 
-        <!-- Save Contact Card Banner -->
-        <div class="mb-8">
-            <a href="{{ route('profile.contact', $profile->slug) }}" class="w-full py-4 px-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-base {{ $buttonStyle }} flex items-center justify-center gap-3 shadow-lg shadow-sky-500/20 hover:opacity-95 transition">
-                <i class="fa-solid fa-user-plus text-lg"></i>
-                <span>Save Contact to Phone</span>
-            </a>
-        </div>
+        @php
+            $otherSocials = $profile->socialLinks->filter(function($link) {
+                return !in_array(strtolower($link->platform), ['instagram', 'facebook', 'linkedin', 'youtube']);
+            });
+        @endphp
 
-        <!-- Social Media Links -->
-        @if($profile->socialLinks->count() > 0)
+        <!-- Other Social Media Links -->
+        @if($otherSocials->count() > 0)
             <div class="space-y-3 mb-8">
-                <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 px-1">Social Networks</h3>
-                @foreach($profile->socialLinks as $link)
+                <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 px-1">Other Socials</h3>
+                @foreach($otherSocials as $link)
                     @php
                         $iconClass = match(strtolower($link->platform)) {
-                            'instagram' => 'fa-brands fa-instagram text-pink-500',
-                            'facebook' => 'fa-brands fa-facebook text-blue-600',
-                            'linkedin' => 'fa-brands fa-linkedin text-blue-700',
-                            'youtube' => 'fa-brands fa-youtube text-red-600',
+                            'website' => 'fa-solid fa-globe text-sky-500',
                             'twitter', 'x' => 'fa-brands fa-x-twitter',
                             'whatsapp' => 'fa-brands fa-whatsapp text-emerald-500',
                             'github' => 'fa-brands fa-github',
                             'tiktok' => 'fa-brands fa-tiktok',
+                            'threads' => 'fa-brands fa-threads',
+                            'pinterest' => 'fa-brands fa-pinterest text-red-600',
+                            'snapchat' => 'fa-brands fa-snapchat text-yellow-400',
+                            'telegram' => 'fa-brands fa-telegram text-blue-500',
+                            'discord' => 'fa-brands fa-discord text-indigo-500',
+                            'spotify' => 'fa-brands fa-spotify text-green-500',
+                            'behance' => 'fa-brands fa-behance text-blue-600',
+                            'dribbble' => 'fa-brands fa-dribbble text-pink-500',
+                            'medium' => 'fa-brands fa-medium',
+                            'reddit' => 'fa-brands fa-reddit text-orange-600',
                             default => 'fa-solid fa-link text-sky-500',
                         };
                     @endphp
@@ -138,20 +204,47 @@
         <!-- Custom Links -->
         @if($profile->customLinks->count() > 0)
             <div class="space-y-3 mb-8">
-                <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 px-1">Featured Links</h3>
-                @foreach($profile->customLinks as $link)
-                    <a href="{{ route('profile.click', ['profile' => $profile->id, 'link' => $link->id]) }}?type=custom" target="_blank" class="w-full p-4 bg-slate-900 text-white {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-md hover:bg-slate-800 transition">
-                        <div>
-                            <span class="block">{{ $link->title }}</span>
-                            @if($link->description)
-                                <span class="text-xs font-normal opacity-75 block mt-0.5">{{ $link->description }}</span>
+                <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 px-1">More Links</h3>
+                @foreach($profile->customLinks->sortBy('sort_order') as $link)
+                    <a href="{{ route('profile.click', ['profile' => $profile->id, 'link' => $link->id]) }}?type=custom" target="_blank" class="w-full p-4 bg-slate-900 text-white {{ $buttonStyle }} flex items-center justify-between font-bold text-sm shadow-md hover:bg-slate-800 transition group">
+                        <div class="flex items-center gap-3">
+                            @if($link->icon)
+                                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-white/20 transition-colors">
+                                    <i class="{{ $link->icon }} text-sm"></i>
+                                </div>
                             @endif
+                            <div>
+                                <span class="block">{{ $link->title }}</span>
+                                @if($link->description)
+                                    <span class="text-xs font-normal opacity-75 block mt-0.5">{{ $link->description }}</span>
+                                @endif
+                            </div>
                         </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
                     </a>
                 @endforeach
             </div>
         @endif
+        
+        <!-- Share Profile Button -->
+        <button onclick="shareProfile()" class="w-full mt-6 py-4 bg-slate-100 text-slate-800 {{ $buttonStyle }} font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
+            <i class="fa-solid fa-share-nodes"></i> Share This Profile
+        </button>
+
+        <script>
+            function shareProfile() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: '{{ $profile->name }}',
+                        text: '{{ Str::limit($profile->bio ?? "Check out my profile", 100) }}',
+                        url: window.location.href,
+                    }).catch(console.error);
+                } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('Profile URL copied to clipboard!');
+                }
+            }
+        </script>
     </div>
 
     <footer class="text-center py-6 border-t border-black/5 text-xs opacity-60">

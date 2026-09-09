@@ -6,9 +6,6 @@ use App\Models\QRProfile;
 
 class ContactCardService
 {
-    /**
-     * Generate dynamic RFC 6350 compliant VCF string for a profile.
-     */
     public function generateVCard(QRProfile $profile): string
     {
         $lines = [
@@ -37,8 +34,26 @@ class ContactCardService
             $lines[] = 'URL:' . $this->escapeVCard($profile->website);
         }
 
+        if (!empty($profile->whatsapp)) {
+            $lines[] = 'TEL;TYPE=WORK,VOICE:' . $this->escapeVCard($profile->whatsapp);
+        }
+
+        if (!empty($profile->address)) {
+            $lines[] = 'ADR;TYPE=WORK:;;' . $this->escapeVCard($profile->address) . ';;;;';
+        }
+
         if (!empty($profile->bio)) {
             $lines[] = 'NOTE:' . $this->escapeVCard($profile->bio);
+        }
+
+        // Add specific social links
+        foreach ($profile->socialLinks as $link) {
+            $platform = strtolower($link->platform);
+            if (in_array($platform, ['instagram', 'facebook', 'linkedin', 'youtube'])) {
+                $lines[] = 'X-SOCIALPROFILE;type=' . $platform . ':' . $this->escapeVCard($link->url);
+                // Also add as URL for better compatibility
+                $lines[] = 'URL;type=' . ucfirst($platform) . ':' . $this->escapeVCard($link->url);
+            }
         }
 
         $lines[] = 'END:VCARD';
@@ -48,6 +63,7 @@ class ContactCardService
 
     private function escapeVCard(string $value): string
     {
-        return str_replace(['\\', ';', ',', "\n"], ['\\\\', '\;', '\,', '\n'], trim($value));
+        return str_replace(['\\\\', ';', ',', "\n"], ['\\\\\\\\', '\;', '\,', '\n'], trim($value));
     }
 }
+

@@ -55,12 +55,12 @@ Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('ref
 */
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:10,1');
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:6,1');
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:3,1');
     Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.update');
 });
@@ -145,6 +145,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::delete('/profiles/{profile}/social-links/{link}', [ProfileController::class, 'deleteSocialLink'])->name('profiles.social.delete');
     Route::post('/profiles/{id}/links', [ProfileController::class, 'addCustomLink'])->name('profiles.custom.add');
     Route::post('/profiles/{id}/custom-links', [ProfileController::class, 'addCustomLink']);
+    Route::post('/profiles/{id}/custom-links/reorder', [ProfileController::class, 'reorderCustomLinks'])->name('profiles.custom.reorder');
+    Route::put('/profiles/{profile}/custom-links/{link}', [ProfileController::class, 'updateCustomLink'])->name('profiles.custom.update');
     Route::delete('/profiles/{profile}/custom-links/{link}', [ProfileController::class, 'deleteCustomLink'])->name('profiles.custom.delete');
 
     // Billing & Subscriptions Module

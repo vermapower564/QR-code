@@ -100,8 +100,10 @@ class ProfileController extends Controller
             'company' => $request->company,
             'bio' => $request->bio,
             'phone' => $request->phone,
+            'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'website' => $request->website,
+            'address' => $request->address,
             'profile_image' => $profileImagePath,
             'logo' => $logoPath,
             'template_id' => $request->template_id,
@@ -182,8 +184,10 @@ class ProfileController extends Controller
             'company' => $request->company,
             'bio' => $request->bio,
             'phone' => $request->phone,
+            'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'website' => $request->website,
+            'address' => $request->address,
             'template_id' => $request->template_id ?? $profile->template_id,
             'theme_data' => array_merge($profile->theme_data ?? [], [
                 'bg_color' => $request->input('bg_color', $profile->theme_data['bg_color'] ?? '#f8fafc'),
@@ -239,7 +243,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'platform' => ['required', 'string'],
-            'url' => ['required', 'url'],
+            'url' => ['required', 'string', new \App\Rules\SafeUrl],
             'title' => ['nullable', 'string'],
         ]);
 
@@ -264,14 +268,16 @@ class ProfileController extends Controller
 
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'url' => ['required', 'url'],
+            'url' => ['required', 'string', new \App\Rules\SafeUrl],
             'description' => ['nullable', 'string', 'max:255'],
+            'icon' => ['nullable', 'string', 'max:50'],
         ]);
 
         $profile->customLinks()->create([
             'title' => $request->title,
             'url' => $request->url,
             'description' => $request->description,
+            'icon' => $request->icon,
             'sort_order' => $profile->customLinks()->count() + 1,
             'status' => 'active',
         ]);
@@ -279,11 +285,46 @@ class ProfileController extends Controller
         return back()->with('success', 'Custom button link added!');
     }
 
+    public function reorderCustomLinks(Request $request, int $id)
+    {
+        $profile = Auth::user()->qrProfiles()->findOrFail($id);
+        $orders = $request->input('orders', []); // Expected: [link_id => sort_order]
+
+        foreach ($orders as $linkId => $sortOrder) {
+            $profile->customLinks()->where('id', $linkId)->update(['sort_order' => $sortOrder]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
     public function deleteSocialLink(int $profileId, int $linkId)
     {
         $profile = Auth::user()->qrProfiles()->findOrFail($profileId);
         $profile->socialLinks()->where('id', $linkId)->delete();
         return back()->with('success', 'Social link removed.');
+    }
+
+    public function updateCustomLink(Request $request, int $profileId, int $linkId)
+    {
+        $profile = Auth::user()->qrProfiles()->findOrFail($profileId);
+        $link = $profile->customLinks()->findOrFail($linkId);
+
+        $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'url' => ['required', 'string', new \App\Rules\SafeUrl],
+            'description' => ['nullable', 'string', 'max:255'],
+            'icon' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $link->update([
+            'title' => $request->title,
+            'url' => $request->url,
+            'description' => $request->description,
+            'icon' => $request->icon,
+        ]);
+
+        return back()->with('success', 'Custom link updated!');
     }
 
     public function deleteCustomLink(int $profileId, int $linkId)
