@@ -72,4 +72,9 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
     {
         return $this->hasMany(Webhook::class);
     }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\QueuedVerifyEmail);
+    }
 }
