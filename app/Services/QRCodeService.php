@@ -30,7 +30,7 @@ class QRCodeService
         $fgColor = $options['foreground_color'] ?? '#000000';
         $bgColor = $options['background_color'] ?? '#ffffff';
         $style = $options['style'] ?? 'square';
-        $format = $options['format'] ?? 'png';
+        $format = $options['format'] ?? 'svg';
         $logoPath = $options['logo_path'] ?? null;
         $size = (int) ($options['size'] ?? 512);
 

@@ -76,7 +76,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('onboarding.store') }}" method="POST" @submit="submitting = true" class="space-y-6">
+            <form action="{{ route('onboarding.store') }}" method="POST" @submit="submitting = true" class="space-y-6" novalidate>
                 @csrf
 
                 <!-- STEP 1: Basic Details -->
