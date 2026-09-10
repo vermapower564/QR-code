@@ -61,7 +61,7 @@ class RegisterController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255'],
             'password' => [
                 'required',
                 'confirmed',
@@ -74,6 +74,28 @@ class RegisterController extends Controller
             'company' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
         ], $messages);
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            if ($existingUser->hasVerifiedEmail()) {
+                throw ValidationException::withMessages([
+                    'email' => ['An account with this email already exists. Please log in.'],
+                ]);
+            } else {
+                $key = 'resend_verification_' . $existingUser->id;
+                if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 1)) {
+                    throw ValidationException::withMessages([
+                        'email' => ['Please wait 60 seconds before requesting another verification email.'],
+                    ]);
+                }
+                \Illuminate\Support\Facades\RateLimiter::hit($key, 60);
+
+                $existingUser->sendEmailVerificationNotification();
+
+                return back()->with('success', 'This account already exists but is not verified. We have sent a new verification email.');
+            }
+        }
 
         $freePlan = Plan::where('slug', 'free')->first();
 
