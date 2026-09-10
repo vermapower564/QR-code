@@ -24,4 +24,10 @@ class VerificationController extends Controller
 
         return back()->with('status', 'verification-link-sent');
     }
+
+    public function verify(\Illuminate\Foundation\Auth\EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+        return redirect()->route('dashboard.index');
+    }
 }

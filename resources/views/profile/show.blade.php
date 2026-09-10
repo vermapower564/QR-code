@@ -244,7 +244,7 @@
                         <input type="email" name="email" required placeholder="Your Email" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
                     </div>
                     <div>
-                        <input type="text" name="phone" placeholder="Your Phone (Optional)" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
+                        <input type="text" name="phone" placeholder="Your Phone (Optional) 10 digits" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
                     </div>
                     <div>
                         <textarea name="message" rows="2" placeholder="Message (Optional)" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white"></textarea>

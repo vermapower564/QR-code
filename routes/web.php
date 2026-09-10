@@ -70,6 +70,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
     Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware('signed')->name('verification.verify');
 
     // Onboarding Flow Routes
     Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');

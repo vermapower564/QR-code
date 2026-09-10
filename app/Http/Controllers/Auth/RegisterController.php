@@ -56,6 +56,7 @@ class RegisterController extends Controller
             'password.confirmed' => 'Passwords do not match.',
             'website.required' => 'Please enter a valid website URL.',
             'website.url' => 'Please enter a valid website URL.',
+            'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ];
 
         $request->validate([
@@ -71,7 +72,7 @@ class RegisterController extends Controller
             ],
             'website' => ['nullable', 'string', 'max:2048'],
             'company' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
         ], $messages);
 
         $freePlan = Plan::where('slug', 'free')->first();
