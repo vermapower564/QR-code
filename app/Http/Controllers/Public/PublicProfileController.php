@@ -38,10 +38,13 @@ class PublicProfileController extends Controller
             abort(404);
         }
 
-        // Primary lookup: Active QR profile
-        $profile = QRProfile::where('slug', $slugLower)
-            ->with(['socialLinks', 'customLinks', 'template', 'user'])
-            ->first();
+        // High Performance Redis/File Cache (60 minutes)
+        $cacheKey = 'profile:' . $slugLower;
+        $profile = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($slugLower) {
+            return QRProfile::where('slug', $slugLower)
+                ->with(['socialLinks', 'customLinks', 'template', 'user'])
+                ->first();
+        });
 
         // Secondary lookup: Historical slug redirect (301 Permanent Redirect)
         if (!$profile) {
@@ -57,6 +60,13 @@ class PublicProfileController extends Controller
             return response()->view('profile.unavailable', ['profile' => $profile], 403);
         }
 
+        if ($profile->profile_password) {
+            $sessionKey = 'profile_unlocked_' . $profile->id;
+            if (!$request->session()->has($sessionKey)) {
+                return view('profile.password', compact('profile'));
+            }
+        }
+
         // Record scan analytics (sync fallback + queue job dispatch)
         try {
             $this->analyticsService->recordScan($profile, $request);
@@ -66,6 +76,40 @@ class PublicProfileController extends Controller
         }
 
         return view('profile.show', compact('profile'));
+    }
+
+    public function unlock(string $slug, Request $request)
+    {
+        $profile = QRProfile::where('slug', strtolower($slug))->firstOrFail();
+        
+        $request->validate(['password' => 'required|string']);
+
+        if ($request->password === $profile->profile_password) {
+            $request->session()->put('profile_unlocked_' . $profile->id, true);
+            return redirect()->route('profile.show', $profile->slug);
+        }
+
+        return back()->withErrors(['password' => 'Incorrect password']);
+    }
+
+    public function submitLead(string $slug, Request $request)
+    {
+        $profile = QRProfile::where('slug', strtolower($slug))->firstOrFail();
+
+        if (!$profile->enable_lead_capture) {
+            abort(403, 'Lead capture is disabled');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'message' => 'nullable|string|max:1000',
+        ]);
+
+        $profile->leads()->create($validated);
+
+        return back()->with('success', 'Thank you! Your information has been submitted.');
     }
 
     public function checkSlug(Request $request)

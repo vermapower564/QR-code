@@ -54,9 +54,12 @@
 
             <!-- Action Buttons Grid -->
             <div class="pt-4 border-t border-slate-100 space-y-2">
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-4 gap-2">
                     <a href="{{ route('dashboard.profiles.edit', $profile->id) }}" class="py-2 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
                         <i class="fa-solid fa-pen text-slate-500 mr-1"></i> Edit
+                    </a>
+                    <a href="{{ route('dashboard.profiles.leads', $profile->id) }}" class="py-2 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                        <i class="fa-solid fa-users text-slate-500 mr-1"></i> Leads
                     </a>
                     <a href="{{ route('dashboard.profiles.analytics', $profile->id) }}" class="py-2 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
                         <i class="fa-solid fa-chart-simple text-purple-500 mr-1"></i> Stats

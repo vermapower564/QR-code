@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])->name('profile.show');
+Route::post('/p/{slug}/unlock', [PublicProfileController::class, 'unlock'])->name('profile.unlock');
+Route::post('/p/{slug}/lead', [PublicProfileController::class, 'submitLead'])->name('profile.lead');
 Route::post('/p/{slug}/report', [ReportController::class, 'store'])->name('profile.report');
 Route::get('/p/{slug}/booking', [PublicProfileController::class, 'showBooking'])->name('profile.booking');
 Route::get('/p/{slug}/contact', [PublicProfileController::class, 'downloadContact'])->name('profile.contact');
@@ -116,6 +118,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/profiles/bulk/process', [BulkImportController::class, 'process'])->name('profiles.bulk.process');
 
     Route::get('/profiles/{id}/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
+    Route::get('/profiles/{id}/leads', [ProfileController::class, 'leads'])->name('profiles.leads');
     Route::put('/profiles/{id}', [ProfileController::class, 'update'])->name('profiles.update');
     Route::patch('/profiles/{id}', [ProfileController::class, 'update']);
     Route::delete('/profiles/{id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');

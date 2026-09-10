@@ -226,6 +226,36 @@
             </div>
         @endif
         
+        <!-- Lead Capture Form -->
+        @if($profile->enable_lead_capture)
+            <div class="space-y-3 mb-8 bg-white/80 p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h3 class="text-xs uppercase font-bold tracking-widest opacity-60 mb-2 text-slate-800">Contact Me</h3>
+                @if(session('success'))
+                    <div class="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                <form action="{{ route('profile.lead', $profile->slug) }}" method="POST" class="space-y-3">
+                    @csrf
+                    <div>
+                        <input type="text" name="name" required placeholder="Your Name" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
+                    </div>
+                    <div>
+                        <input type="email" name="email" required placeholder="Your Email" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
+                    </div>
+                    <div>
+                        <input type="text" name="phone" placeholder="Your Phone (Optional)" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white">
+                    </div>
+                    <div>
+                        <textarea name="message" rows="2" placeholder="Message (Optional)" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 bg-white"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition shadow-md">
+                        Submit
+                    </button>
+                </form>
+            </div>
+        @endif
+
         <!-- Share Profile Button -->
         <button onclick="shareProfile()" class="w-full mt-6 py-4 bg-slate-100 text-slate-800 {{ $buttonStyle }} font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
             <i class="fa-solid fa-share-nodes"></i> Share This Profile

@@ -30,10 +30,13 @@ class QRProfile extends Model
         'template_id',
         'theme_data',
         'status',
+        'profile_password',
+        'enable_lead_capture',
     ];
 
     protected $casts = [
         'theme_data' => 'array',
+        'enable_lead_capture' => 'boolean',
     ];
 
     public function user()
@@ -69,6 +72,11 @@ class QRProfile extends Model
     public function analyticsEvents()
     {
         return $this->hasMany(AnalyticsEvent::class, 'profile_id');
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(ProfileLead::class, 'profile_id')->orderBy('created_at', 'desc');
     }
 
     public function getPublicUrlAttribute(): string

@@ -73,6 +73,8 @@ class ProfileController extends Controller
             'seo_description' => ['nullable', 'string', 'max:160'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
             'template_id' => ['nullable', 'exists:templates,id'],
+            'profile_password' => ['nullable', 'string', 'max:255'],
+            'enable_lead_capture' => ['nullable', 'boolean'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
             'website.url' => 'Please enter a valid website URL.',
@@ -111,6 +113,8 @@ class ProfileController extends Controller
             'profile_image' => $profileImagePath,
             'logo' => $logoPath,
             'template_id' => $request->template_id,
+            'profile_password' => $request->profile_password,
+            'enable_lead_capture' => $request->boolean('enable_lead_capture'),
             'theme_data' => [
                 'bg_color' => $request->input('bg_color', '#f8fafc'),
                 'text_color' => $request->input('text_color', '#0f172a'),
@@ -164,6 +168,8 @@ class ProfileController extends Controller
             'seo_title' => ['nullable', 'string', 'max:70'],
             'seo_description' => ['nullable', 'string', 'max:160'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
+            'profile_password' => ['nullable', 'string', 'max:255'],
+            'enable_lead_capture' => ['nullable', 'boolean'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
             'website.url' => 'Please enter a valid website URL.',
@@ -199,6 +205,8 @@ class ProfileController extends Controller
             'seo_description' => $request->seo_description,
             'address' => $request->address,
             'template_id' => $request->template_id ?? $profile->template_id,
+            'profile_password' => $request->profile_password,
+            'enable_lead_capture' => $request->boolean('enable_lead_capture'),
             'theme_data' => array_merge($profile->theme_data ?? [], [
                 'bg_color' => $request->input('bg_color', $profile->theme_data['bg_color'] ?? '#f8fafc'),
                 'text_color' => $request->input('text_color', $profile->theme_data['text_color'] ?? '#0f172a'),
@@ -245,6 +253,13 @@ class ProfileController extends Controller
         $this->qrCodeService->generate($replica);
 
         return redirect()->route('dashboard.profiles.index')->with('success', 'Profile duplicated successfully!');
+    }
+
+    public function leads(int $id)
+    {
+        $profile = Auth::user()->qrProfiles()->findOrFail($id);
+        $leads = $profile->leads()->paginate(15);
+        return view('dashboard.profiles.leads', compact('profile', 'leads'));
     }
 
     public function addSocialLink(Request $request, int $id)
