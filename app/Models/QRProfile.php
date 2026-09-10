@@ -37,6 +37,7 @@ class QRProfile extends Model
     protected $casts = [
         'theme_data' => 'array',
         'enable_lead_capture' => 'boolean',
+        'user_id' => 'integer',
     ];
 
     public function user()

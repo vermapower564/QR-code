@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-6xl mx-auto"
      x-data="{ 
-         step: 1,
+         step: parseInt(new URLSearchParams(window.location.search).get('step')) || 1,
          totalSteps: 3,
          submitting: false,
          name: '{{ old('name') }}',
@@ -20,6 +20,11 @@
          avatarPreview: null,
          logoPreview: null,
          
+         init() {
+             window.addEventListener('popstate', () => {
+                 this.step = parseInt(new URLSearchParams(window.location.search).get('step')) || 1;
+             });
+         },
          handleAvatar(e) {
              if(e.target.files.length > 0) {
                  this.avatarPreview = URL.createObjectURL(e.target.files[0]);
@@ -38,12 +43,18 @@
          nextStep() {
              if (this.canGoNext() && this.step < this.totalSteps) {
                  this.step++;
+                 const url = new URL(window.location);
+                 url.searchParams.set('step', this.step);
+                 window.history.pushState({ step: this.step }, '', url);
                  window.scrollTo({ top: 0, behavior: 'smooth' });
              }
          },
          prevStep() {
              if (this.step > 1) {
                  this.step--;
+                 const url = new URL(window.location);
+                 url.searchParams.set('step', this.step);
+                 window.history.pushState({ step: this.step }, '', url);
                  window.scrollTo({ top: 0, behavior: 'smooth' });
              }
          }

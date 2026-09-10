@@ -144,9 +144,13 @@ class RegistrationWebsiteTest extends TestCase
 
     public function test_unauthorized_user_cannot_edit_another_users_profile(): void
     {
-        $owner = new User(['id' => 10, 'role' => 'user']);
-        $unauthorizedUser = new User(['id' => 20, 'role' => 'user']);
-        $profile = new QRProfile(['id' => 100, 'user_id' => 10, 'slug' => 'owner-slug']);
+        $owner = new User(['role' => 'user']);
+        $owner->id = 10;
+        $unauthorizedUser = new User(['role' => 'user']);
+        $unauthorizedUser->id = 20;
+        
+        $profile = new QRProfile(['user_id' => 10, 'slug' => 'owner-slug']);
+        $profile->id = 100;
 
         $policy = new \App\Policies\QRProfilePolicy();
 

@@ -63,8 +63,10 @@ class AuthAndOnboardingTest extends TestCase
 
     public function test_ownership_policy_prevents_unauthorized_profile_access(): void
     {
-        $owner = new User(['id' => 1, 'role' => 'user']);
-        $stranger = new User(['id' => 2, 'role' => 'user']);
+        $owner = new User(['role' => 'user']);
+        $owner->id = 1;
+        $stranger = new User(['role' => 'user']);
+        $stranger->id = 2;
         $profile = new QRProfile(['user_id' => 1, 'slug' => 'owner-profile']);
 
         $policy = new \App\Policies\QRProfilePolicy();

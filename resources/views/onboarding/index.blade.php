@@ -29,12 +29,17 @@
 
         <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-200" 
              x-data="{ 
-                 step: 1, 
+                 step: parseInt(new URLSearchParams(window.location.search).get('step')) || 1, 
                  totalSteps: 4, 
                  submitting: false,
                  name: '{{ old('name', $existingProfile->name ?? Auth::user()->name) }}',
                  username: '{{ old('username', $existingProfile->slug ?? '') }}',
                  phone: '{{ old('phone', $existingProfile->phone ?? Auth::user()->phone) }}',
+                 init() {
+                     window.addEventListener('popstate', () => {
+                         this.step = parseInt(new URLSearchParams(window.location.search).get('step')) || 1;
+                     });
+                 },
                  canGoNext() {
                      if (this.step === 1) return this.name.trim() !== '' && this.username.trim() !== '';
                      if (this.step === 3 && this.phone && this.phone.length !== 10) return false;
@@ -43,12 +48,18 @@
                  nextStep() {
                      if (this.canGoNext() && this.step < this.totalSteps) {
                          this.step++;
+                         const url = new URL(window.location);
+                         url.searchParams.set('step', this.step);
+                         window.history.pushState({ step: this.step }, '', url);
                          window.scrollTo({ top: 0, behavior: 'smooth' });
                      }
                  },
                  prevStep() {
                      if (this.step > 1) {
                          this.step--;
+                         const url = new URL(window.location);
+                         url.searchParams.set('step', this.step);
+                         window.history.pushState({ step: this.step }, '', url);
                          window.scrollTo({ top: 0, behavior: 'smooth' });
                      }
                  }

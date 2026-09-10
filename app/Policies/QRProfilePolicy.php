@@ -21,7 +21,7 @@ class QRProfilePolicy
      */
     public function view(User $user, QRProfile $qrProfile): bool
     {
-        return $user->isAdmin() || $user->id === $qrProfile->user_id;
+        return $user->isAdmin() || $user->id == $qrProfile->user_id;
     }
 
     /**
@@ -37,7 +37,7 @@ class QRProfilePolicy
      */
     public function update(User $user, QRProfile $qrProfile): bool
     {
-        return $user->isAdmin() || $user->id === $qrProfile->user_id;
+        return $user->isAdmin() || $user->id == $qrProfile->user_id;
     }
 
     /**
@@ -45,7 +45,7 @@ class QRProfilePolicy
      */
     public function delete(User $user, QRProfile $qrProfile): bool
     {
-        return $user->isAdmin() || $user->id === $qrProfile->user_id;
+        return $user->isAdmin() || $user->id == $qrProfile->user_id;
     }
 
     /**
@@ -53,7 +53,7 @@ class QRProfilePolicy
      */
     public function manageQr(User $user, QRProfile $qrProfile): bool
     {
-        return $user->isAdmin() || $user->id === $qrProfile->user_id;
+        return $user->isAdmin() || $user->id == $qrProfile->user_id;
     }
 
     /**
@@ -61,6 +61,6 @@ class QRProfilePolicy
      */
     public function viewAnalytics(User $user, QRProfile $qrProfile): bool
     {
-        return $user->isAdmin() || $user->id === $qrProfile->user_id;
+        return $user->isAdmin() || $user->id == $qrProfile->user_id;
     }
 }

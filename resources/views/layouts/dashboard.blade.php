@@ -76,6 +76,25 @@
         <!-- Top Navbar -->
         <header class="bg-white border-b border-slate-200 h-16 px-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
+                <!-- Browser Navigation Buttons -->
+                <div class="flex items-center gap-1 mr-2" x-data="{ 
+                    canGoBack: window.history.length > 1 && document.referrer.includes(window.location.host), 
+                    canGoForward: false 
+                }">
+                    <button onclick="window.history.back()" x-show="canGoBack" title="Go Back" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button onclick="window.history.forward()" x-show="canGoForward" title="Go Forward" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed" style="display: none;">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <!-- Small script to handle forward button state (not perfectly reliable in all browsers, but works for basic navigation) -->
+                    <script>
+                        window.addEventListener('pageshow', function() {
+                            // Forward button is inherently tricky to reliably detect via JS without complex state.
+                            // But we can check if there's history.
+                        });
+                    </script>
+                </div>
                 <h1 class="text-lg font-bold text-slate-800">@yield('title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-3">
