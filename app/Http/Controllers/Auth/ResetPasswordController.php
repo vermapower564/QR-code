@@ -40,21 +40,28 @@ class ResetPasswordController extends Controller
             'password.confirmed' => 'Passwords do not match.',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
+        $record = \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
-                $user->save();
+        if (!$record || !\Illuminate\Support\Facades\Hash::check($request->token, $record->token)) {
+            return back()->withErrors(['email' => ['Invalid or expired reset token.']]);
+        }
 
-                event(new PasswordReset($user));
-            }
-        );
+        $user = \App\Models\User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => ['We can\'t find a user with that email address.']]);
+        }
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+        $user->forceFill([
+            'password' => Hash::make($request->password)
+        ])->setRememberToken(Str::random(60));
+
+        $user->save();
+
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        session()->forget('reset_email');
+
+        event(new PasswordReset($user));
+
+        return redirect()->route('login')->with('status', 'Your password has been reset successfully!');
     }
 }

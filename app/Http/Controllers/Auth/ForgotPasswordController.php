@@ -24,10 +24,11 @@ class ForgotPasswordController extends Controller
         }
 
         $request->validate([
-            'email' => ['required', 'email:rfc,dns']
+            'email' => ['required', 'email:rfc,dns', 'exists:users,email']
         ], [
             'email.required' => 'Email is required.',
-            'email.email' => 'Please enter a valid email address.'
+            'email.email' => 'Please enter a valid email address.',
+            'email.exists' => 'No account found with this email address.'
         ]);
 
         $throttleKey = 'forgot-password|' . Str::transliterate($request->input('email')) . '|' . $request->ip();
@@ -40,9 +41,47 @@ class ForgotPasswordController extends Controller
 
         RateLimiter::hit($throttleKey, 60);
 
-        Password::sendResetLink($request->only('email'));
+        $otp = rand(100000, 999999);
 
-        // Generic security response preventing account enumeration
-        return back()->with('status', 'If an account exists for this email, password reset instructions have been sent.');
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            ['token' => \Illuminate\Support\Facades\Hash::make($otp), 'created_at' => now()]
+        );
+
+        \Illuminate\Support\Facades\Mail::to($request->email)->send(new \App\Mail\ResetPasswordOtpMail($otp));
+
+        session()->put('reset_email', $request->email);
+
+        return redirect()->route('password.otp')->with('status', 'A 6-digit code has been sent to your email.');
+    }
+
+    public function showOtpForm()
+    {
+        if (!session()->has('reset_email')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth.otp');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate(['otp' => 'required|digits:6']);
+        $email = session('reset_email');
+
+        if (!$email) {
+            return redirect()->route('password.request');
+        }
+
+        $record = \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $email)->first();
+
+        if ($record && \Illuminate\Support\Facades\Hash::check($request->otp, $record->token)) {
+            // Check expiration (e.g. 15 mins)
+            if (\Carbon\Carbon::parse($record->created_at)->addMinutes(15)->isPast()) {
+                return back()->withErrors(['otp' => 'This code has expired. Please request a new one.']);
+            }
+            return redirect()->route('password.reset', ['token' => $request->otp, 'email' => $email]);
+        }
+
+        return back()->withErrors(['otp' => 'The entered code is incorrect.']);
     }
 }
