@@ -25,6 +25,17 @@
                 </div>
             @endforeach
         </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-16 flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <a href="{{ route('features') }}" class="px-6 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold text-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Back: Features
+            </a>
+            
+            <a href="{{ route('how-it-works') }}" class="px-6 py-3 bg-sky-600 text-white hover:bg-sky-700 rounded-xl font-bold text-sm transition flex items-center gap-2 shadow-md">
+                Next: How It Works <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
     </div>
 </section>
 @endsection

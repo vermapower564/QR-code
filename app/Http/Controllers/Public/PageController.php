@@ -14,6 +14,16 @@ class PageController extends Controller
         return view('pages.pricing', compact('plans'));
     }
 
+    public function features()
+    {
+        return view('pages.features');
+    }
+
+    public function howItWorks()
+    {
+        return view('pages.how-it-works');
+    }
+
     public function about()
     {
         return view('pages.about');

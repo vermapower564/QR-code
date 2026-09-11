@@ -120,6 +120,20 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 text-sm p-4 rounded-xl">
+                    <div class="flex items-center gap-2 font-bold mb-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                        <span>Please fix the following issues:</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 ml-1 text-rose-700">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>

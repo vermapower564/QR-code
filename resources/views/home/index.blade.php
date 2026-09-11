@@ -23,8 +23,8 @@
             <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-2xl shadow-lg shadow-sky-500/20 transition">
                 Create Your QR <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
             </a>
-            <a href="#demo" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition">
-                View Demo
+            <a href="{{ route('how-it-works') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition">
+                See How It Works
             </a>
         </div>
 

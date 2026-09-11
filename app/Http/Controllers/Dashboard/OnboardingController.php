@@ -49,6 +49,31 @@ class OnboardingController extends Controller
 
         $profileId = $existingProfile ? $existingProfile->id : null;
 
+        // URL Normalization and Validation
+        $linkValidator = app(\App\Services\LinkValidationService::class);
+        
+        if ($request->filled('website')) {
+            $normalizedWebsite = $linkValidator->normalizeUrl($request->website);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                return back()->withErrors(['website' => 'Please enter a valid website URL.'])->withInput();
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        }
+
+        if ($request->has('social') && is_array($request->social)) {
+            $socials = $request->input('social');
+            foreach ($socials as $platform => $url) {
+                if (!empty($url)) {
+                    $normalizedUrl = $linkValidator->normalizeUrl($url);
+                    if (!$linkValidator->isValidUrl($normalizedUrl)) {
+                        return back()->withErrors(['social.' . $platform => "Please enter a valid URL for " . ucfirst($platform)])->withInput();
+                    }
+                    $socials[$platform] = $normalizedUrl;
+                }
+            }
+            $request->merge(['social' => $socials]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'alpha_dash', 'max:50', 'unique:qr_profiles,slug,' . $profileId],
@@ -57,7 +82,7 @@ class OnboardingController extends Controller
             'bio' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'regex:/^[0-9]{10}$/'],
             'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:2048'],
             'template_id' => ['nullable', 'exists:templates,id'],
         ], [
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
@@ -65,6 +90,9 @@ class OnboardingController extends Controller
 
         $reserved = ['admin', 'login', 'register', 'dashboard', 'api', 'pricing', 'support', 'about', 'contact', 'settings', 'onboarding'];
         if (in_array(strtolower($request->username), $reserved)) {
+            if ($request->ajax() || $request->input('is_draft')) {
+                return response()->json(['success' => false, 'errors' => ['username' => ['This username is reserved. Please select another one.']]], 422);
+            }
             return back()->withErrors(['username' => 'This username is reserved. Please select another one.']);
         }
 
@@ -81,6 +109,7 @@ class OnboardingController extends Controller
                     'company' => $request->company,
                     'bio' => $request->bio,
                     'phone' => $request->phone,
+                    'whatsapp' => $request->whatsapp,
                     'email' => $request->email,
                     'website' => $request->website ?: $user->website,
                     'template_id' => $request->template_id,
@@ -96,6 +125,7 @@ class OnboardingController extends Controller
                     'company' => $request->company,
                     'bio' => $request->bio,
                     'phone' => $request->phone,
+                    'whatsapp' => $request->whatsapp,
                     'email' => $request->email,
                     'website' => $request->website ?: $user->website,
                     'template_id' => $request->template_id,
@@ -107,6 +137,40 @@ class OnboardingController extends Controller
                     ],
                     'status' => 'active',
                 ]);
+            }
+
+            // Sync Social Links
+            if ($request->has('social')) {
+                $socials = $request->input('social');
+                $platforms = [
+                    'instagram' => ['title' => 'Instagram', 'icon' => 'fa-brands fa-instagram'],
+                    'facebook' => ['title' => 'Facebook', 'icon' => 'fa-brands fa-facebook'],
+                    'linkedin' => ['title' => 'LinkedIn', 'icon' => 'fa-brands fa-linkedin'],
+                    'youtube' => ['title' => 'YouTube', 'icon' => 'fa-brands fa-youtube'],
+                ];
+                
+                $order = 0;
+                foreach ($platforms as $key => $info) {
+                    if (!empty($socials[$key])) {
+                        $profile->socialLinks()->updateOrCreate(
+                            ['platform' => $key],
+                            [
+                                'title' => $info['title'],
+                                'url' => $socials[$key],
+                                'icon' => $info['icon'],
+                                'sort_order' => $order++,
+                                'status' => 'active'
+                            ]
+                        );
+                    } else {
+                        $profile->socialLinks()->where('platform', $key)->delete();
+                    }
+                }
+            }
+
+            if ($request->ajax() || $request->input('is_draft')) {
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Draft saved']);
             }
 
             // Generate dynamic QR Code
@@ -121,6 +185,9 @@ class OnboardingController extends Controller
             return redirect()->route('onboarding.complete');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax() || $request->input('is_draft')) {
+                return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
+            }
             return back()->withErrors(['error' => 'Failed to create profile or QR code. Please try again: ' . $e->getMessage()]);
         }
     }

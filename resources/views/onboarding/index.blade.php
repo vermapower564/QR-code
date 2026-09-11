@@ -27,10 +27,19 @@
             </div>
         @endif
 
+        @php
+            $socials = [];
+            if (isset($existingProfile)) {
+                foreach ($existingProfile->socialLinks as $link) {
+                    $socials[$link->platform] = $link->url;
+                }
+            }
+        @endphp
+
         <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-200" 
              x-data="{ 
                  step: parseInt(new URLSearchParams(window.location.search).get('step')) || 1, 
-                 totalSteps: 4, 
+                 totalSteps: 5, 
                  submitting: false,
                  name: '{{ old('name', $existingProfile->name ?? Auth::user()->name) }}',
                  username: '{{ old('username', $existingProfile->slug ?? '') }}',
@@ -40,13 +49,42 @@
                          this.step = parseInt(new URLSearchParams(window.location.search).get('step')) || 1;
                      });
                  },
-                 canGoNext() {
-                     if (this.step === 1) return this.name.trim() !== '' && this.username.trim() !== '';
-                     if (this.step === 3 && this.phone && this.phone.length !== 10) return false;
+                 formatUrl(event) {
+                     let val = event.target.value.trim();
+                     if (val && !/^https?:\/\//i.test(val)) {
+                         event.target.value = 'https://' + val;
+                     }
+                 },
+                 validateCurrentStep() {
+                     if (!this.$refs.form) return true;
+                     const inputs = Array.from(this.$refs.form.elements).filter(el => {
+                         return el.offsetParent !== null; // only check visible inputs
+                     });
+                     for (let el of inputs) {
+                         if (!el.checkValidity()) {
+                             el.reportValidity();
+                             return false;
+                         }
+                     }
                      return true;
                  },
+                 async saveDraft() {
+                     const form = this.$refs.form;
+                     const formData = new FormData(form);
+                     formData.append('is_draft', '1');
+                     try {
+                         await fetch('{{ route('onboarding.store') }}', {
+                             method: 'POST',
+                             body: formData,
+                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                         });
+                     } catch (e) {
+                         console.error('Draft save failed', e);
+                     }
+                 },
                  nextStep() {
-                     if (this.canGoNext() && this.step < this.totalSteps) {
+                     if (this.validateCurrentStep() && this.step < this.totalSteps) {
+                         this.saveDraft();
                          this.step++;
                          const url = new URL(window.location);
                          url.searchParams.set('step', this.step);
@@ -56,6 +94,7 @@
                  },
                  prevStep() {
                      if (this.step > 1) {
+                         this.saveDraft();
                          this.step--;
                          const url = new URL(window.location);
                          url.searchParams.set('step', this.step);
@@ -68,15 +107,15 @@
             <!-- Multi-step Indicator Bar -->
             <div class="mb-8">
                 <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    <span>Step <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
-                    <span x-text="step === 1 ? 'Basic Info' : (step === 2 ? 'Professional' : (step === 3 ? 'Contact Info' : 'Template & Submit'))"></span>
+                    <span x-text="'Step ' + step + ' of ' + totalSteps"></span>
+                    <span x-text="Math.round((step / totalSteps) * 100) + '% Completed'"></span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                    <div class="bg-sky-600 h-2.5 rounded-full transition-all duration-300" :style="'width: ' + (step / totalSteps * 100) + '%'"></div>
+                    <div class="bg-sky-500 h-2.5 rounded-full transition-all duration-500 ease-out" :style="'width: ' + ((step / totalSteps) * 100) + '%'"></div>
                 </div>
             </div>
 
-            <form action="{{ route('onboarding.store') }}" method="POST" @submit="submitting = true" class="space-y-6" novalidate>
+            <form x-ref="form" id="onboardingForm" action="{{ route('onboarding.store') }}" method="POST" @submit="submitting = true" @keydown.enter.prevent="if(step < totalSteps) { nextStep() }" class="space-y-6">
                 @csrf
 
                 <!-- STEP 1: Basic Details -->
@@ -143,13 +182,44 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Website</label>
-                            <input type="url" name="website" value="{{ old('website', $existingProfile->website ?? '') }}" placeholder="https://example.com" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                            <input type="url" name="website" value="{{ old('website', $existingProfile->website ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://example.com" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
                         </div>
                     </div>
                 </div>
 
-                <!-- STEP 4: Template Choice & Submit -->
+                <!-- STEP 4: Social Media Links -->
                 <div x-show="step === 4" x-transition.opacity style="display: none;">
+                    <h2 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-hashtag text-sky-600"></i> Social Media Links (Optional)
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-4">Add links to your social profiles. Skip any you don't want to show.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-instagram text-pink-600 mr-1"></i> Instagram URL</label>
+                            <input type="url" name="social[instagram]" value="{{ old('social.instagram', $socials['instagram'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://instagram.com/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-facebook text-blue-600 mr-1"></i> Facebook URL</label>
+                            <input type="url" name="social[facebook]" value="{{ old('social.facebook', $socials['facebook'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://facebook.com/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-linkedin text-blue-700 mr-1"></i> LinkedIn URL</label>
+                            <input type="url" name="social[linkedin]" value="{{ old('social.linkedin', $socials['linkedin'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://linkedin.com/in/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-youtube text-red-600 mr-1"></i> YouTube URL</label>
+                            <input type="url" name="social[youtube]" value="{{ old('social.youtube', $socials['youtube'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://youtube.com/c/channel" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-whatsapp text-green-500 mr-1"></i> WhatsApp Number</label>
+                            <input type="text" name="whatsapp" value="{{ old('whatsapp', $existingProfile->whatsapp ?? '') }}" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid number or safe URL" placeholder="1234567890" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: Template Choice & Submit -->
+                <div x-show="step === 5" x-transition.opacity style="display: none;">
                     <h2 class="text-base font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100 flex items-center gap-2">
                         <i class="fa-solid fa-palette text-sky-600"></i> Select Template Preset
                     </h2>
@@ -180,7 +250,7 @@
                     <template x-if="step < totalSteps">
                         <button type="button" 
                                 @click="nextStep()" 
-                                :disabled="!canGoNext() || submitting" 
+                                :disabled="submitting" 
                                 class="px-6 py-3 font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 rounded-xl shadow-md transition text-sm flex items-center gap-2">
                             Next <i class="fa-solid fa-arrow-right"></i>
                         </button>

@@ -26,10 +26,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Username / Slug *</label>
-                        <div class="flex rounded-xl border border-slate-300 overflow-hidden">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Username / Profile ID (Cannot be changed)</label>
+                        <div class="flex rounded-xl border border-slate-300 overflow-hidden bg-slate-50">
                             <span class="bg-slate-100 px-3 py-3 text-slate-500 text-xs font-mono border-r border-slate-300 flex items-center">/p/</span>
-                            <input type="text" name="username" value="{{ old('username', $profile->slug) }}" required class="w-full px-3 py-3 text-sm outline-none"/>
+                            <input type="text" value="{{ $profile->slug }}" readonly disabled class="w-full px-3 py-3 text-sm outline-none bg-slate-50 text-slate-500 cursor-not-allowed"/>
                         </div>
                     </div>
 
@@ -75,6 +75,29 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Bio / Overview</label>
                     <textarea name="bio" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none">{{ old('bio', $profile->bio) }}</textarea>
+                </div>
+
+                <!-- Social Links -->
+                @php
+                    $socials = $profile->socialLinks->pluck('url', 'platform')->toArray();
+                @endphp
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100" x-data="{ formatUrl: function(event) { let val = event.target.value.trim(); if (val && !/^https?:\/\//i.test(val)) { event.target.value = 'https://' + val; } } }">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-instagram text-pink-600 mr-1"></i> Instagram URL</label>
+                        <input type="url" name="social[instagram]" value="{{ old('social.instagram', $socials['instagram'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://instagram.com/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-facebook text-blue-600 mr-1"></i> Facebook URL</label>
+                        <input type="url" name="social[facebook]" value="{{ old('social.facebook', $socials['facebook'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://facebook.com/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-linkedin text-blue-700 mr-1"></i> LinkedIn URL</label>
+                        <input type="url" name="social[linkedin]" value="{{ old('social.linkedin', $socials['linkedin'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://linkedin.com/in/username" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"><i class="fa-brands fa-youtube text-red-600 mr-1"></i> YouTube URL</label>
+                        <input type="url" name="social[youtube]" value="{{ old('social.youtube', $socials['youtube'] ?? '') }}" @blur="formatUrl" pattern="^(?!([jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]|[fF][iI][lL][eE]|[vV][bB][sS][cC][rR][iI][pP][tT]):).*" title="Please enter a valid, safe URL" placeholder="https://youtube.com/c/channel" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    </div>
                 </div>
 
                 <!-- Theme Style Selectors -->
@@ -123,7 +146,7 @@
 
             <!-- Existing Social Links -->
             <div class="space-y-3 mb-6">
-                @forelse($profile->socialLinks as $slink)
+                @forelse($profile->socialLinks->whereNotIn('platform', ['instagram', 'facebook', 'linkedin', 'youtube', 'website', 'whatsapp']) as $slink)
                     <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-center gap-3">
                             @php
@@ -155,21 +178,16 @@
             <form action="{{ route('dashboard.profiles.social.add', $profile->id) }}" method="POST" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
                 @csrf
                 <select name="platform" required class="px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold">
-                    <option value="website">Website</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="linkedin">LinkedIn</option>
                     <option value="twitter">X / Twitter</option>
-                    <option value="youtube">YouTube</option>
                     <option value="tiktok">TikTok</option>
                     <option value="threads">Threads</option>
                     <option value="pinterest">Pinterest</option>
                     <option value="snapchat">Snapchat</option>
                     <option value="telegram">Telegram</option>
-                    <option value="whatsapp">WhatsApp</option>
                     <option value="github">GitHub</option>
                     <option value="discord">Discord</option>
                     <option value="spotify">Spotify</option>
+                    <option value="apple">Apple Music</option>
                     <option value="behance">Behance</option>
                     <option value="dribbble">Dribbble</option>
                     <option value="medium">Medium</option>

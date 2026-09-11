@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Dashboard;
 
@@ -57,6 +57,21 @@ class ProfileController extends Controller
                 return back()->withErrors(['website' => 'Please enter a valid website URL.'])->withInput();
             }
             $request->merge(['website' => $normalizedWebsite]);
+        }
+
+        if ($request->has('social') && is_array($request->social)) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $socials = $request->input('social');
+            foreach ($socials as $platform => $url) {
+                if (!empty($url)) {
+                    $normalizedUrl = $linkValidator->normalizeUrl($url);
+                    if (!$linkValidator->isValidUrl($normalizedUrl)) {
+                        return back()->withErrors(['social.' . $platform => "Please enter a valid URL for " . ucfirst($platform)])->withInput();
+                    }
+                    $socials[$platform] = $normalizedUrl;
+                }
+            }
+            $request->merge(['social' => $socials]);
         }
 
         $request->validate([
@@ -155,9 +170,23 @@ class ProfileController extends Controller
             $request->merge(['website' => $normalizedWebsite]);
         }
 
+        if ($request->has('social') && is_array($request->social)) {
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $socials = $request->input('social');
+            foreach ($socials as $platform => $url) {
+                if (!empty($url)) {
+                    $normalizedUrl = $linkValidator->normalizeUrl($url);
+                    if (!$linkValidator->isValidUrl($normalizedUrl)) {
+                        return back()->withErrors(['social.' . $platform => "Please enter a valid URL for " . ucfirst($platform)])->withInput();
+                    }
+                    $socials[$platform] = $normalizedUrl;
+                }
+            }
+            $request->merge(['social' => $socials]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'alpha_dash', 'max:50', 'unique:qr_profiles,slug,' . $profile->id],
             'designation' => ['nullable', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:1000'],
@@ -192,7 +221,6 @@ class ProfileController extends Controller
         $profile->update([
             'seo_title' => $request->seo_title,
             'seo_description' => $request->seo_description,
-            'slug' => strtolower($request->username),
             'name' => $request->name,
             'designation' => $request->designation,
             'company' => $request->company,
@@ -201,8 +229,6 @@ class ProfileController extends Controller
             'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'website' => $request->website,
-            'seo_title' => $request->seo_title,
-            'seo_description' => $request->seo_description,
             'address' => $request->address,
             'template_id' => $request->template_id ?? $profile->template_id,
             'profile_password' => $request->profile_password,
@@ -214,6 +240,34 @@ class ProfileController extends Controller
                 'theme_preset' => $request->input('theme_preset', $profile->theme_data['theme_preset'] ?? 'Classic'),
             ]),
         ]);
+
+        if ($request->has('social')) {
+            $socials = $request->input('social');
+            $platforms = [
+                'instagram' => ['title' => 'Instagram', 'icon' => 'fa-brands fa-instagram'],
+                'facebook' => ['title' => 'Facebook', 'icon' => 'fa-brands fa-facebook'],
+                'linkedin' => ['title' => 'LinkedIn', 'icon' => 'fa-brands fa-linkedin'],
+                'youtube' => ['title' => 'YouTube', 'icon' => 'fa-brands fa-youtube'],
+            ];
+            
+            $order = 0;
+            foreach ($platforms as $key => $info) {
+                if (!empty($socials[$key])) {
+                    $profile->socialLinks()->updateOrCreate(
+                        ['platform' => $key],
+                        [
+                            'title' => $info['title'],
+                            'url' => $socials[$key],
+                            'icon' => $info['icon'],
+                            'sort_order' => $order++,
+                            'status' => 'active'
+                        ]
+                    );
+                } else {
+                    $profile->socialLinks()->where('platform', $key)->delete();
+                }
+            }
+        }
 
         return back()->with('success', 'Profile updated successfully!');
     }
@@ -445,3 +499,6 @@ class ProfileController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 }
+
+
+

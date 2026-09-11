@@ -25,10 +25,10 @@
                 <span>QR Identity</span>
             </a>
             
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-                <a href="#features" class="hover:text-slate-900 transition">Features</a>
-                <a href="#how-it-works" class="hover:text-slate-900 transition">How it works</a>
-                <a href="#pricing" class="hover:text-slate-900 transition">Pricing</a>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
+                <a href="{{ route('features') }}" class="hover:text-slate-900 transition">Features</a>
+                <a href="{{ route('pricing') }}" class="hover:text-slate-900 transition">Pricing</a>
+                <a href="{{ route('how-it-works') }}" class="hover:text-slate-900 transition">How It Works</a>
             </nav>
 
             <div class="flex items-center gap-4">
