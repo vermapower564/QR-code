@@ -35,17 +35,21 @@ class RegisterController extends Controller
             ]);
         }
 
-        // 2. Validate and Normalize Website / URL Link
-        $rawWebsite = (string) $request->input('website', '');
-        $linkValidator = app(\App\Services\LinkValidationService::class);
-        $normalizedWebsite = $linkValidator->normalizeUrl($rawWebsite);
+        // 2. Validate and Normalize Website / URL Link (Optional)
+        if ($request->filled('website')) {
+            $rawWebsite = (string) $request->input('website', '');
+            $linkValidator = app(\App\Services\LinkValidationService::class);
+            $normalizedWebsite = $linkValidator->normalizeUrl($rawWebsite);
 
-        if (empty($normalizedWebsite) || !$linkValidator->isValidUrl($normalizedWebsite)) {
-            throw ValidationException::withMessages([
-                'website' => ['Please enter a valid website URL.'],
-            ]);
+            if (!$linkValidator->isValidUrl($normalizedWebsite)) {
+                throw ValidationException::withMessages([
+                    'website' => ['Please enter a valid website URL.'],
+                ]);
+            }
+            $request->merge(['website' => $normalizedWebsite]);
+        } else {
+            $request->merge(['website' => null]);
         }
-        $request->merge(['website' => $normalizedWebsite]);
 
         $messages = [
             'name.required' => 'Full name is required.',
@@ -53,22 +57,20 @@ class RegisterController extends Controller
             'email.email' => 'Please enter a valid email address.',
             'email.unique' => 'An account with this email already exists.',
             'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Passwords do not match.',
-            'website.required' => 'Please enter a valid website URL.',
             'website.url' => 'Please enter a valid website URL.',
             'phone.regex' => 'Mobile number must be strictly 10 digits (0-9).',
         ];
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email:rfc,dns', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => [
                 'required',
+                'string',
+                'min:8',
                 'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
             ],
             'website' => ['nullable', 'string', 'max:2048'],
             'company' => ['nullable', 'string', 'max:255'],

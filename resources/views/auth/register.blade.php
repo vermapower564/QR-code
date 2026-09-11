@@ -13,14 +13,13 @@
             get strength() {
                 if (!this.password) return { label: '', color: '', percent: 0 };
                 let score = 0;
-                if (this.password.length >= 8) score++;
-                if (/[A-Z]/.test(this.password)) score++;
-                if (/[a-z]/.test(this.password)) score++;
+                if (this.password.length >= 8) score += 2;
                 if (/[0-9]/.test(this.password)) score++;
+                if (/[A-Z]/.test(this.password)) score++;
                 if (/[^A-Za-z0-9]/.test(this.password)) score++;
 
                 if (score <= 2) return { label: 'Weak', color: 'bg-rose-500 text-rose-700', percent: 33 };
-                if (score <= 4) return { label: 'Medium', color: 'bg-amber-500 text-amber-700', percent: 66 };
+                if (score <= 3) return { label: 'Good', color: 'bg-amber-500 text-amber-700', percent: 66 };
                 return { label: 'Strong', color: 'bg-emerald-500 text-emerald-700', percent: 100 };
             }
          }">
@@ -74,7 +73,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password *</label>
                 <div class="relative">
-                    <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" required placeholder="Minimum 8 chars (e.g. Roushan@123)" class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                    <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" required placeholder="Minimum 8 characters" class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
                     <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm p-1 focus:outline-none" aria-label="Toggle Password Visibility">
                         <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                     </button>
@@ -90,7 +89,7 @@
                         <div class="h-full transition-all duration-300" :class="strength.color" :style="`width: ${strength.percent}%`"></div>
                     </div>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">Requires 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol (e.g. <span class="font-mono text-slate-600">Roushan@123</span>)</p>
+                <p class="text-[11px] text-slate-400 mt-1">Requires at least 8 characters (e.g. <span class="font-mono text-slate-600">Roushan@123</span> or <span class="font-mono text-slate-600">Password123</span>)</p>
             </div>
 
             <div>

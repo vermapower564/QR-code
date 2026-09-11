@@ -27,11 +27,12 @@ class ResetPasswordController extends Controller
 
         $request->validate([
             'token' => 'required',
-            'email' => 'required|email:rfc,dns',
+            'email' => 'required|email',
             'password' => [
                 'required',
+                'string',
+                'min:8',
                 'confirmed',
-                Rules\Password::min(8)->mixedCase()->numbers()->symbols()
             ],
         ], [
             'email.required' => 'Email is required.',
