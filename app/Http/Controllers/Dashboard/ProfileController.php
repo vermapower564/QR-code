@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers\Dashboard;
 
@@ -499,6 +499,7 @@ class ProfileController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 }
+
 
 
 

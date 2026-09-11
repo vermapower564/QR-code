@@ -17,10 +17,12 @@
         <!-- Dynamic QR Preview Card -->
         <div class="my-8 bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block shadow-inner">
             <div class="bg-white p-4 rounded-xl shadow-md inline-block">
-                @if($profile->qrCode && $profile->qrCode->qr_image_path)
-                    <img src="{{ asset('storage/' . $profile->qrCode->qr_image_path) }}" alt="Dynamic QR Code" class="w-48 h-48 mx-auto"/>
+                @if($profile->qrCode && $profile->qrCode->file_path)
+                    <img src="{{ asset('storage/' . $profile->qrCode->file_path) }}" alt="Dynamic QR Code" class="w-48 h-48 mx-auto"/>
                 @else
-                    <img src="{{ route('api.qr', $profile->slug) }}" alt="Dynamic QR Code" class="w-48 h-48 mx-auto"/>
+                    <div class="w-48 h-48 mx-auto bg-slate-100 flex items-center justify-center rounded-xl">
+                        <i class="fa-solid fa-qrcode text-4xl text-slate-300"></i>
+                    </div>
                 @endif
             </div>
             <div class="mt-3 text-xs font-semibold text-slate-500">

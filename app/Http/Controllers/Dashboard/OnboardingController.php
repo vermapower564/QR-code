@@ -102,6 +102,8 @@ class OnboardingController extends Controller
             $slug = strtolower($request->username);
 
             if ($existingProfile) {
+                \Illuminate\Support\Facades\Cache::forget('profile:' . strtolower($existingProfile->slug));
+                \Illuminate\Support\Facades\Cache::forget('profile:' . strtolower($slug));
                 $existingProfile->update([
                     'slug' => $slug,
                     'name' => $request->name,
@@ -117,6 +119,7 @@ class OnboardingController extends Controller
                 ]);
                 $profile = $existingProfile;
             } else {
+                \Illuminate\Support\Facades\Cache::forget('profile:' . strtolower($slug));
                 $profile = QRProfile::create([
                     'user_id' => $user->id,
                     'slug' => $slug,
@@ -205,3 +208,6 @@ class OnboardingController extends Controller
         return view('onboarding.complete', compact('profile'));
     }
 }
+
+
+

@@ -74,6 +74,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        $bizTemplate = Template::where('slug', 'business-card')->first();
+        $creatorTemplate = Template::where('slug', 'creator')->first();
+        $devTemplate = Template::where('slug', 'developer')->first();
         // 3. Seed Admin User
         $admin = User::firstOrCreate(['email' => 'admin@qrsocialsaas.com'], [
             'name' => 'System Admin',

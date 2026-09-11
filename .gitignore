@@ -13,6 +13,7 @@ yarn-error.log
 /.idea
 /.vscode
 
+/storage/app/
 /storage/framework/
 /storage/logs/
 *.sqlite
