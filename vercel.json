@@ -1,12 +1,16 @@
 {
     "version": 2,
     "framework": null,
+    "outputDirectory": "public",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.6.2"
         }
     },
     "routes": [
+        {
+            "handle": "filesystem"
+        },
         {
             "src": "/build/(.*)",
             "dest": "/public/build/$1"
