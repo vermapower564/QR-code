@@ -41,12 +41,12 @@
                 <button type="button" 
                         id="login-card"
                         @click="setTab('login')"
-                        :class="activeTab === 'login' ? 'bg-white text-indigo-700 shadow-md font-extrabold border-slate-200' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                        :class="activeTab === 'login' ? 'bg-white text-sky-600 shadow-md font-extrabold border-slate-200' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                         class="flex-1 py-3 px-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all">
-                    <span class="w-8 h-8 rounded-xl flex items-center justify-center text-sm" :class="activeTab === 'login' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-500'">
-                        <i class="fa-solid fa-right-to-bracket"></i>
+                    <span class="w-8 h-8 rounded-xl flex items-center justify-center text-sm" :class="activeTab === 'login' ? 'bg-sky-100 text-sky-600' : 'bg-slate-200 text-slate-500'">
+                        <i class="fa-solid fa-lock"></i>
                     </span>
-                    <span>Sign In with Email</span>
+                    <span>Login Box (Open Dashboard)</span>
                     @auth
                         <span class="hidden sm:inline-block text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Active</span>
                     @endauth
@@ -278,13 +278,23 @@
                             </div>
                         </div>
                     @else
-                        <!-- Guest Login Form -->
-                        <div class="text-center mb-8">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-xl flex items-center justify-center mx-auto shadow-md mb-3">
-                                <i class="fa-solid fa-right-to-bracket"></i>
+                        <!-- Guest Login Box for User Dashboard -->
+                        <div class="text-center mb-6">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-md mb-3">
+                                <i class="fa-solid fa-gauge-high"></i>
                             </div>
-                            <h2 class="text-2xl font-black text-slate-900">Log In to Your Account</h2>
-                            <p class="text-xs text-slate-500 mt-1">Enter your registered email and password to access your dashboard</p>
+                            <span class="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-[10px] font-black uppercase tracking-wider mb-2">User Dashboard Login Box</span>
+                            <h2 class="text-2xl font-black text-sky-600">Login Box &mdash; Open User Dashboard</h2>
+                            <p class="text-xs text-slate-500 mt-1">Provide your registered Email ID and Password to unlock and open your user dashboard.</p>
+                        </div>
+
+                        <!-- Security & Auth Notice -->
+                        <div class="mb-5 bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3.5 rounded-2xl font-semibold flex items-start gap-2.5 shadow-sm">
+                            <i class="fa-solid fa-shield-halved text-amber-600 text-base mt-0.5 shrink-0"></i>
+                            <div>
+                                <span class="font-black block uppercase text-[10px] tracking-wider text-amber-700">Protected User Area</span>
+                                <span>Without your Email ID and Password, the user page cannot be opened. Enter your credentials below to proceed.</span>
+                            </div>
                         </div>
 
                         <!-- Status & Validation Alerts -->
@@ -305,12 +315,14 @@
                         <form action="{{ route('login') }}" method="POST" @submit="submittingLogin = true" class="space-y-4">
                             @csrf
                             
-                            <!-- Email Input -->
+                            <!-- Email ID Input -->
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    <i class="fa-regular fa-envelope text-sky-600 mr-1"></i> Email ID
+                                </label>
                                 <div class="relative">
                                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-                                        <i class="fa-solid fa-envelope"></i>
+                                        <i class="fa-solid fa-at"></i>
                                     </span>
                                     <input type="email" 
                                            id="home_email_field"
@@ -319,13 +331,15 @@
                                            value="{{ old('email') }}" 
                                            required 
                                            placeholder="john@example.com" 
-                                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition font-medium"/>
                                 </div>
                             </div>
 
                             <!-- Password Input -->
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    <i class="fa-solid fa-key text-sky-600 mr-1"></i> Password
+                                </label>
                                 <div class="relative">
                                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
                                         <i class="fa-solid fa-lock"></i>
@@ -336,7 +350,7 @@
                                            x-model="loginPassword"
                                            required 
                                            placeholder="••••••••" 
-                                           class="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition"/>
+                                           class="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none transition font-medium"/>
                                     <button type="button" 
                                             @click="showPassword = !showPassword" 
                                             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm p-1 focus:outline-none" 
@@ -350,35 +364,54 @@
                             <div class="flex items-center justify-between text-xs font-semibold pt-1">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" name="remember" class="rounded text-sky-600 focus:ring-sky-500"/>
-                                    <span class="text-slate-600">Remember me</span>
+                                    <span class="text-slate-600">Keep me logged in</span>
                                 </label>
                                 <a href="{{ route('password.request') }}" class="text-sky-600 hover:underline">Forgot Password?</a>
                             </div>
 
-                            <!-- Submit Button -->
+                            <!-- Submit Button to Open Dashboard -->
                             <button type="submit" 
                                     :disabled="submittingLogin" 
-                                    class="w-full py-3.5 px-4 font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-50 rounded-xl shadow-md shadow-sky-500/25 transition text-sm flex items-center justify-center gap-2 mt-2">
-                                <span x-show="!submittingLogin">Sign In with Email</span>
-                                <span x-show="submittingLogin"><i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...</span>
+                                    class="w-full py-3.5 px-4 font-black text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-50 rounded-xl shadow-lg shadow-sky-500/25 transition text-sm flex items-center justify-center gap-2 mt-2">
+                                <span x-show="!submittingLogin" class="flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Verify & Open Dashboard
+                                </span>
+                                <span x-show="submittingLogin" class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...
+                                </span>
                             </button>
                         </form>
 
-                        <!-- Quick Fill Demo Accounts -->
+                        <!-- Quick Fill Demo Accounts (4 Cards) -->
                         <div class="mt-6 pt-5 border-t border-slate-200">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2.5">
-                                ⚡ Instant 1-Click Test Credentials
-                            </p>
-                            <div class="flex flex-wrap gap-2 justify-center">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">⚡ 1-Click Test Credentials:</span>
+                                <span class="text-[10px] font-bold text-slate-400">Pass: password</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
                                 <button type="button" 
                                         @click="fillCredentials('john@example.com', 'password')"
-                                        class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-user text-sky-600"></i> User (john@example.com)
+                                        class="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-left transition group">
+                                    <div class="text-[11px] font-bold text-slate-800 group-hover:text-sky-600 truncate">John Doe (CEO)</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">john@example.com</div>
+                                </button>
+                                <button type="button" 
+                                        @click="fillCredentials('sarah@example.com', 'password')"
+                                        class="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-left transition group">
+                                    <div class="text-[11px] font-bold text-slate-800 group-hover:text-sky-600 truncate">Sarah (Creator)</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">sarah@example.com</div>
+                                </button>
+                                <button type="button" 
+                                        @click="fillCredentials('alex@example.com', 'password')"
+                                        class="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-left transition group">
+                                    <div class="text-[11px] font-bold text-slate-800 group-hover:text-sky-600 truncate">Alex (Dev)</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">alex@example.com</div>
                                 </button>
                                 <button type="button" 
                                         @click="fillCredentials('admin@qrsocialsaas.com', 'password')"
-                                        class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-shield text-indigo-600"></i> Admin (admin@...)
+                                        class="p-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-left transition group">
+                                    <div class="text-[11px] font-bold text-indigo-700 truncate">System Admin</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">admin@...</div>
                                 </button>
                             </div>
                         </div>

@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+        $middleware->redirectGuestsTo(fn () => route('login', ['auth_required' => 1]));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -17,5 +17,6 @@ yarn-error.log
 /storage/framework/
 /storage/logs/
 *.sqlite
+!database/database.sqlite
 *.sqlite-journal
 /public/hot

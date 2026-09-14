@@ -75,7 +75,9 @@
                         Dashboard
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm font-semibold text-slate-700 hover:text-slate-900 transition">Sign in</a>
+                    <a href="{{ route('login', ['auth_required' => 1]) }}" class="text-sm font-bold text-slate-700 hover:text-sky-600 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock text-sky-600"></i> Login to Dashboard
+                    </a>
                     <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-xl hover:bg-sky-700 shadow-sm transition">
                         Create Your QR
                     </a>
