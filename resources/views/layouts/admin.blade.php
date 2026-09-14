@@ -6,6 +6,8 @@
     <title>@yield('title', 'Admin Panel') - QR Identity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Smart Navigation Helper -->
+    <script src="{{ asset('js/navigation.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex">
@@ -65,7 +67,24 @@
 
     <div class="flex-1 flex flex-col min-w-0">
         <header class="bg-slate-950 border-b border-slate-800 h-16 px-6 flex items-center justify-between">
-            <h1 class="text-lg font-bold text-white">@yield('title', 'Admin Panel')</h1>
+            <div class="flex items-center gap-4">
+                <!-- Back & Next Navigation Buttons -->
+                <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-bold gap-1 shadow-inner">
+                    <button type="button" onclick="navigateApp('back')" title="Go Back" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span class="hidden sm:inline">Back</span>
+                    </button>
+                    <span class="h-3.5 w-px bg-slate-800"></span>
+                    <button type="button" onclick="navigateApp('next')" title="Go Next" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <span class="hidden sm:inline">Next</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <h1 class="text-lg font-bold text-white">@yield('title', 'Admin Panel')</h1>
+            </div>
+            <a href="{{ route('dashboard.index') }}" class="text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                <i class="fa-solid fa-gauge"></i> <span>User Dashboard</span>
+            </a>
         </header>
 
         <main class="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
@@ -77,6 +96,19 @@
             @endif
             @yield('content')
         </main>
+    </div>
+
+    <!-- Floating Back & Next Navigation Widget -->
+    <div class="fixed bottom-6 right-6 z-40 flex items-center gap-1.5 bg-slate-950/90 text-white backdrop-blur-md px-2.5 py-2 rounded-2xl shadow-2xl border border-slate-800">
+        <button type="button" onclick="navigateApp('back')" title="Go Back" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800 transition">
+            <i class="fa-solid fa-arrow-left text-[11px]"></i>
+            <span>Back</span>
+        </button>
+        <span class="h-4 w-px bg-slate-800"></span>
+        <button type="button" onclick="navigateApp('next')" title="Go Next" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800 transition">
+            <span>Next</span>
+            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+        </button>
     </div>
 </body>
 </html>

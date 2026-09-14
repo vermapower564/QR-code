@@ -19,6 +19,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Smart Navigation Helper -->
+    <script src="{{ asset('js/navigation.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
     @php
@@ -39,7 +41,20 @@
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased flex flex-col justify-between p-4 sm:p-6">
-    <div class="max-w-md w-full mx-auto pt-6 pb-12">
+    <div class="max-w-md w-full mx-auto pt-2 pb-12">
+        <!-- Top Back & Home Navigation -->
+        <div class="flex items-center justify-between mb-5">
+            <button type="button" onclick="navigateApp('back')" title="Go Back" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold {{ $isDark ? 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700' : 'bg-white/80 hover:bg-white text-slate-700 border-slate-200' }} shadow-sm border transition backdrop-blur-sm">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            <a href="{{ url('/') }}" title="QR Identity Home" class="flex items-center gap-1.5 text-xs font-bold {{ $isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900' }} transition">
+                <i class="fa-solid fa-qrcode text-sky-500"></i> Home
+            </a>
+            <button type="button" onclick="navigateApp('next')" title="Go Next" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold {{ $isDark ? 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700' : 'bg-white/80 hover:bg-white text-slate-700 border-slate-200' }} shadow-sm border transition backdrop-blur-sm">
+                Next <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
         <!-- Header / Avatar -->
         <div class="text-center mb-6">
             @if($profile->profile_image)
