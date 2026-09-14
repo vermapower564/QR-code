@@ -7,18 +7,22 @@
     <!-- Header & Sub-Navigation -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-            <h1 class="text-2xl font-black text-slate-900">Payment Methods</h1>
-            <p class="text-xs text-slate-500 mt-1">Manage saved credit cards, default payment options, and billing authorization.</p>
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse"></span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Saved Cards</span>
+            </div>
+            <h1 class="text-2xl font-black text-sky-600 mt-1">Payment Methods</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Manage saved credit cards, default payment options, and billing authorization.</p>
         </div>
         <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
-            <a href="{{ route('dashboard.billing.index') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview</a>
+            <a href="{{ route('dashboard.billing.index') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview & Plans</a>
             <a href="{{ route('dashboard.billing.invoices') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Invoices</a>
-            <a href="{{ route('dashboard.billing.payment-methods') }}" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm">Payment Methods</a>
+            <a href="{{ route('dashboard.billing.payment-methods') }}" class="px-4 py-2 rounded-xl bg-white text-sky-600 shadow-sm">Payment Methods</a>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-sm font-semibold flex items-center gap-3">
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-sm font-semibold flex items-center gap-3 shadow-sm">
             <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
             <span>{{ session('success') }}</span>
         </div>
@@ -26,7 +30,7 @@
 
     <!-- Action Bar -->
     <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-slate-900">Saved Cards</h2>
+        <h2 class="text-lg font-bold text-slate-900">Saved Cards & Payment Gateways</h2>
         <button type="button" @click="showAddModal = true" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-2">
             <i class="fa-solid fa-plus"></i> Add Payment Method
         </button>
@@ -54,7 +58,7 @@
 
                 <div class="flex items-center justify-between pt-4 border-t border-slate-100">
                     @if(!$pm['is_default'])
-                        <form action="{{ route('billing.payment-methods.default') }}" method="POST">
+                        <form action="{{ route('dashboard.billing.payment-methods.default') }}" method="POST">
                             @csrf
                             <input type="hidden" name="payment_method_id" value="{{ $pm['id'] }}">
                             <button type="submit" class="text-xs font-bold text-sky-600 hover:text-sky-700">Set as Default</button>
@@ -79,7 +83,7 @@
                 <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
             </div>
 
-            <form action="{{ route('billing.payment-methods.add') }}" method="POST" class="space-y-4 text-xs font-bold">
+            <form action="{{ route('dashboard.billing.payment-methods.add') }}" method="POST" class="space-y-4 text-xs font-bold">
                 @csrf
                 <input type="hidden" name="token" value="tok_simulated_stripe">
                 <div>

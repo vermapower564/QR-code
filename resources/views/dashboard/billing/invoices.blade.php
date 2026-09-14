@@ -7,15 +7,38 @@
     <!-- Header & Sub-Navigation -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-            <h1 class="text-2xl font-black text-slate-900">Invoice History</h1>
-            <p class="text-xs text-slate-500 mt-1">Search, filter, view details, and download official billing invoices.</p>
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse"></span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Billing History</span>
+            </div>
+            <h1 class="text-2xl font-black text-sky-600 mt-1">Invoice History</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Search, filter, view details, and download official billing receipts and tax invoices.</p>
         </div>
-        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
-            <a href="{{ route('dashboard.billing.index') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview</a>
-            <a href="{{ route('dashboard.billing.invoices') }}" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm">Invoices</a>
-            <a href="{{ route('dashboard.billing.payment-methods') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Payment Methods</a>
+        <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+                <a href="{{ route('dashboard.billing.index') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Overview & Plans</a>
+                <a href="{{ route('dashboard.billing.invoices') }}" class="px-4 py-2 rounded-xl bg-white text-sky-600 shadow-sm">Invoices</a>
+                <a href="{{ route('dashboard.billing.payment-methods') }}" class="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900">Payment Methods</a>
+            </div>
+
+            <!-- Quick Example Generator -->
+            <form action="{{ route('dashboard.billing.simulate') }}" method="POST" class="inline">
+                @csrf
+                <input type="hidden" name="amount" value="29.00">
+                <input type="hidden" name="plan_name" value="Business & Teams Subscription (Example)">
+                <button type="submit" class="px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle text-sky-600"></i> + Add Example Invoice
+                </button>
+            </form>
         </div>
     </div>
+
+    @if(session('success'))
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-sm font-semibold flex items-center gap-3 shadow-sm">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
 
     <!-- Filters, Search & Sorting Bar -->
     <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
@@ -61,7 +84,7 @@
                     <tr class="text-xs font-bold text-slate-400 uppercase border-b border-slate-100 bg-slate-50/50">
                         <th class="py-3.5 px-6">Invoice #</th>
                         <th class="py-3.5 px-4">Date</th>
-                        <th class="py-3.5 px-4">Billing Period</th>
+                        <th class="py-3.5 px-4">Description</th>
                         <th class="py-3.5 px-4">Amount</th>
                         <th class="py-3.5 px-4">Status</th>
                         <th class="py-3.5 px-4">Payment Method</th>
@@ -70,21 +93,33 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($payments as $p)
+                        @php
+                            $planName = $p->payment_data['plan'] ?? 'Subscription Invoice';
+                            $cardBrand = $p->payment_data['card_brand'] ?? 'Visa';
+                            $cardLast4 = $p->payment_data['card_last4'] ?? '4242';
+                        @endphp
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-4 px-6 font-mono font-bold text-slate-900">INV-2026-{{ str_pad($p->id, 4, '0', STR_PAD_LEFT) }}</td>
-                            <td class="py-4 px-4 text-slate-600">{{ $p->created_at->format('M d, Y') }}</td>
-                            <td class="py-4 px-4 text-slate-600 text-xs">{{ $p->created_at->format('M 01') }} - {{ $p->created_at->endOfMonth()->format('M d, Y') }}</td>
+                            <td class="py-4 px-4 text-slate-600 text-xs">{{ $p->created_at ? $p->created_at->format('M d, Y') : now()->format('M d, Y') }}</td>
+                            <td class="py-4 px-4 text-slate-900 text-xs font-semibold">{{ $planName }}</td>
                             <td class="py-4 px-4 font-black text-slate-900">${{ number_format($p->amount, 2) }} {{ strtoupper($p->currency) }}</td>
                             <td class="py-4 px-4">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase">{{ $p->status }}</span>
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase {{ $p->status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                    <i class="fa-solid fa-check text-[10px] mr-1"></i> {{ $p->status }}
+                                </span>
                             </td>
-                            <td class="py-4 px-4 text-slate-600 text-xs capitalize"><i class="fa-solid fa-credit-card mr-1 text-slate-400"></i> {{ $p->provider }}</td>
+                            <td class="py-4 px-4 text-slate-600 text-xs">
+                                <span class="inline-flex items-center gap-1.5 font-semibold">
+                                    <i class="fa-brands fa-cc-{{ strtolower($cardBrand) === 'mastercard' ? 'mastercard' : 'visa' }} text-slate-700 text-sm"></i>
+                                    {{ $cardBrand }} •••• {{ $cardLast4 }}
+                                </span>
+                            </td>
                             <td class="py-4 px-6 text-right space-x-2">
-                                <button type="button" @click="activePayment = { id: 'INV-2026-{{ str_pad($p->id, 4, '0', STR_PAD_LEFT) }}', date: '{{ $p->created_at->format('F d, Y') }}', amount: '${{ number_format($p->amount, 2) }}', status: '{{ ucfirst($p->status) }}', provider: '{{ ucfirst($p->provider) }}', tx: '{{ $p->transaction_id }}' }; showModal = true" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">
+                                <button type="button" @click="activePayment = { id: 'INV-2026-{{ str_pad($p->id, 4, '0', STR_PAD_LEFT) }}', date: '{{ $p->created_at ? $p->created_at->format('F d, Y') : now()->format('F d, Y') }}', plan: '{{ addslashes($planName) }}', amount: '${{ number_format($p->amount, 2) }}', status: '{{ ucfirst($p->status) }}', provider: '{{ $cardBrand }} •••• {{ $cardLast4 }}', tx: '{{ $p->transaction_id }}' }; showModal = true" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">
                                     <i class="fa-solid fa-eye mr-1"></i> Details
                                 </button>
-                                <a href="{{ route('dashboard.billing.invoices.download', $p->id) }}" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg hover:bg-sky-700 transition">
-                                    <i class="fa-solid fa-download mr-1"></i> PDF
+                                <a href="{{ route('dashboard.billing.invoices.download', $p->id) }}" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg hover:bg-sky-700 transition inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-download"></i> Receipt
                                 </a>
                             </td>
                         </tr>
@@ -112,41 +147,62 @@
         <div class="bg-white max-w-lg w-full p-8 rounded-3xl shadow-2xl border border-slate-200" @click.outside="showModal = false">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                 <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Invoice</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Invoice Preview</span>
                     <h3 class="text-xl font-black text-slate-900" x-text="activePayment ? activePayment.id : ''"></h3>
                 </div>
                 <button type="button" @click="showModal = false" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
             </div>
 
-            <div class="space-y-4 text-xs">
-                <div class="flex justify-between py-2 border-b border-slate-100">
-                    <span class="text-slate-500">Customer Name:</span>
-                    <span class="font-bold text-slate-900">{{ $user->name }}</span>
+            <div class="space-y-4 text-xs" x-show="activePayment">
+                <div class="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl">
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Customer</span>
+                        <span class="font-bold text-slate-900">{{ $user->name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Email</span>
+                        <span class="font-bold text-slate-900">{{ $user->email }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Invoice Date</span>
+                        <span class="font-bold text-slate-800" x-text="activePayment ? activePayment.date : ''"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Status</span>
+                        <span class="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-[10px] uppercase" x-text="activePayment ? activePayment.status : ''"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Payment Method</span>
+                        <span class="font-bold text-slate-800" x-text="activePayment ? activePayment.provider : ''"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Transaction ID</span>
+                        <span class="font-mono font-bold text-slate-800" x-text="activePayment ? activePayment.tx : ''"></span>
+                    </div>
                 </div>
-                <div class="flex justify-between py-2 border-b border-slate-100">
-                    <span class="text-slate-500">Email:</span>
-                    <span class="font-bold text-slate-900">{{ $user->email }}</span>
-                </div>
-                <div class="flex justify-between py-2 border-b border-slate-100">
-                    <span class="text-slate-500">Invoice Date:</span>
-                    <span class="font-bold text-slate-900" x-text="activePayment ? activePayment.date : ''"></span>
-                </div>
-                <div class="flex justify-between py-2 border-b border-slate-100">
-                    <span class="text-slate-500">Transaction ID:</span>
-                    <span class="font-mono font-bold text-slate-800" x-text="activePayment ? activePayment.tx : ''"></span>
-                </div>
-                <div class="flex justify-between py-2 border-b border-slate-100">
-                    <span class="text-slate-500">Payment Status:</span>
-                    <span class="font-bold text-emerald-600" x-text="activePayment ? activePayment.status : ''"></span>
-                </div>
-                <div class="flex justify-between py-3 border-t border-slate-200 text-sm">
-                    <span class="font-black text-slate-900">Total Paid:</span>
-                    <span class="font-black text-sky-600" x-text="activePayment ? activePayment.amount : ''"></span>
-                </div>
-            </div>
 
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" @click="showModal = false" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">Close</button>
+                <div class="border border-slate-200 rounded-2xl p-4">
+                    <span class="text-xs font-extrabold uppercase text-slate-400 block mb-2">Itemized Charges</span>
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                        <div>
+                            <span class="font-bold text-slate-900" x-text="activePayment ? activePayment.plan : ''"></span>
+                            <span class="text-[11px] text-slate-500 block">Dynamic QR Code engine & unlimited links</span>
+                        </div>
+                        <span class="font-bold text-slate-900" x-text="activePayment ? activePayment.amount : ''"></span>
+                    </div>
+                    <div class="flex items-center justify-between py-1 text-slate-500">
+                        <span>Tax (0% Standard Software SaaS)</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-3 font-bold text-slate-900 border-t border-slate-100">
+                        <span>Total Paid</span>
+                        <span class="text-base text-sky-600 font-black" x-text="activePayment ? activePayment.amount + ' USD' : ''"></span>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-3">
+                    <button type="button" @click="showModal = false" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">Close</button>
+                </div>
             </div>
         </div>
     </div>

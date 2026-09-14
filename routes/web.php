@@ -174,6 +174,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/billing/downgrade', [BillingController::class, 'subscribe'])->name('billing.downgrade');
     Route::post('/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
     Route::post('/billing/renew', [BillingController::class, 'renew'])->name('billing.renew');
+    Route::post('/billing/simulate-example', [BillingController::class, 'simulateExamplePayment'])->name('billing.simulate');
+    Route::post('/billing/reset-examples', [BillingController::class, 'resetExamples'])->name('billing.reset-examples');
 
     // Account Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

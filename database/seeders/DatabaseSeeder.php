@@ -10,6 +10,8 @@ use App\Models\SocialLink;
 use App\Models\CustomLink;
 use App\Models\QRScan;
 use App\Models\AnalyticsEvent;
+use App\Models\Subscription;
+use App\Models\Payment;
 use App\Services\QRCodeService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -242,6 +244,117 @@ class DatabaseSeeder extends Seeder
 
         app(QRCodeService::class)->generate($profileAlex);
         $this->seedAnalytics($profileAlex->id, 450);
+
+        // Seed billing subscriptions and sample invoices
+        $this->seedBillingForUser($admin, $bizPlan);
+        $this->seedBillingForUser($userJohn, $bizPlan);
+        $this->seedBillingForUser($userSarah, $proPlan);
+        $this->seedBillingForUser($userAlex, $proPlan);
+    }
+
+    private function seedBillingForUser(User $user, Plan $plan): void
+    {
+        $subscription = Subscription::firstOrCreate(
+            ['user_id' => $user->id, 'status' => 'active'],
+            [
+                'plan_id' => $plan->id,
+                'provider' => 'stripe',
+                'provider_subscription_id' => 'sub_stripe_' . uniqid(),
+                'status' => 'active',
+                'starts_at' => now()->subDays(12),
+                'ends_at' => now()->addDays(18),
+            ]
+        );
+
+        if ($user->payments()->count() === 0) {
+            $sampleInvoices = [
+                [
+                    'amount' => $plan->price > 0 ? $plan->price : 29.00,
+                    'created_at' => now()->subDays(12),
+                    'status' => 'completed',
+                    'provider' => 'stripe',
+                    'transaction_id' => 'ch_3N' . strtoupper(substr(md5($user->id . '1'), 0, 14)),
+                    'payment_data' => [
+                        'plan' => $plan->name . ' (Monthly Renewal)',
+                        'cycle' => 'monthly',
+                        'card_brand' => 'Visa',
+                        'card_last4' => '4242',
+                        'tax' => 0.00,
+                    ],
+                ],
+                [
+                    'amount' => $plan->price > 0 ? $plan->price : 29.00,
+                    'created_at' => now()->subDays(42),
+                    'status' => 'completed',
+                    'provider' => 'stripe',
+                    'transaction_id' => 'ch_3M' . strtoupper(substr(md5($user->id . '2'), 0, 14)),
+                    'payment_data' => [
+                        'plan' => $plan->name . ' Subscription',
+                        'cycle' => 'monthly',
+                        'card_brand' => 'Visa',
+                        'card_last4' => '4242',
+                        'tax' => 0.00,
+                    ],
+                ],
+                [
+                    'amount' => 9.00,
+                    'created_at' => now()->subDays(72),
+                    'status' => 'completed',
+                    'provider' => 'stripe',
+                    'transaction_id' => 'ch_3L' . strtoupper(substr(md5($user->id . '3'), 0, 14)),
+                    'payment_data' => [
+                        'plan' => 'Pro Creator Plan Upgrade',
+                        'cycle' => 'monthly',
+                        'card_brand' => 'Mastercard',
+                        'card_last4' => '8888',
+                        'tax' => 0.00,
+                    ],
+                ],
+                [
+                    'amount' => 4.99,
+                    'created_at' => now()->subDays(95),
+                    'status' => 'completed',
+                    'provider' => 'stripe',
+                    'transaction_id' => 'ch_3K' . strtoupper(substr(md5($user->id . '4'), 0, 14)),
+                    'payment_data' => [
+                        'plan' => 'Custom Domain SSL Pack (Add-on)',
+                        'cycle' => 'one-time',
+                        'card_brand' => 'Visa',
+                        'card_last4' => '4242',
+                        'tax' => 0.00,
+                    ],
+                ],
+                [
+                    'amount' => 0.00,
+                    'created_at' => now()->subDays(120),
+                    'status' => 'completed',
+                    'provider' => 'stripe',
+                    'transaction_id' => 'ch_free_' . strtolower(substr(md5($user->id . '5'), 0, 12)),
+                    'payment_data' => [
+                        'plan' => 'Starter Free Tier Setup',
+                        'cycle' => 'lifetime',
+                        'card_brand' => 'System',
+                        'card_last4' => 'Free',
+                        'tax' => 0.00,
+                    ],
+                ],
+            ];
+
+            foreach ($sampleInvoices as $inv) {
+                Payment::create([
+                    'user_id' => $user->id,
+                    'subscription_id' => $subscription->id,
+                    'provider' => $inv['provider'],
+                    'transaction_id' => $inv['transaction_id'],
+                    'amount' => $inv['amount'],
+                    'currency' => 'USD',
+                    'status' => $inv['status'],
+                    'payment_data' => $inv['payment_data'],
+                    'created_at' => $inv['created_at'],
+                    'updated_at' => $inv['created_at'],
+                ]);
+            }
+        }
     }
 
     private function seedSocialLinks(int $profileId, array $links): void
