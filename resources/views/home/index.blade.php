@@ -11,7 +11,7 @@
             <i class="fa-solid fa-bolt text-sky-600"></i> Free Instant QR Generator & Dynamic Identity Platform
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight">
+        <h1 class="text-4xl sm:text-6xl font-black text-sky-600 tracking-tight max-w-4xl mx-auto leading-tight">
             Create your QR Code instantly. <br class="hidden sm:inline"/>
             <span class="bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">Scan, connect & share in seconds.</span>
         </h1>

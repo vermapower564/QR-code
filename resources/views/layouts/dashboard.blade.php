@@ -90,7 +90,10 @@
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
-                <h1 class="text-lg font-bold text-slate-800">@yield('title', 'Dashboard')</h1>
+                <h1 class="text-lg font-black text-sky-600 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                    <span>@yield('title', 'Dashboard')</span>
+                </h1>
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('dashboard.profiles.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-xl hover:bg-sky-700 shadow-sm transition">

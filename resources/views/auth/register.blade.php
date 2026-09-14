@@ -27,7 +27,7 @@
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-black text-xl flex items-center justify-center mx-auto shadow-md mb-3">
                 <i class="fa-solid fa-user-plus"></i>
             </div>
-            <h2 class="text-2xl font-black text-slate-900">Create your account</h2>
+            <h2 class="text-2xl font-black text-sky-600">Create your account</h2>
             <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Create your digital profile and generate your dynamic QR code.</p>
         </div>
 

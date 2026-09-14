@@ -1,4 +1,4 @@
-﻿@extends('layouts.public')
+@extends('layouts.public')
 
 @section('title', 'Features - QR Identity')
 
@@ -6,7 +6,7 @@
 <section class="py-20 bg-slate-50 min-h-[80vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
-            <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Powerful Features, Simple Setup</h1>
+            <h1 class="text-4xl md:text-5xl font-black text-sky-600 tracking-tight">Powerful Features, Simple Setup</h1>
             <p class="mt-4 text-lg text-slate-600">Everything you need to manage your dynamic digital identity with ease. No technical skills required.</p>
         </div>
 

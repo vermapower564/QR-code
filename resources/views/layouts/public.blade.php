@@ -42,12 +42,31 @@
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
+
+                <!-- Active Page Indicator (Changes from black to blue when page opens) -->
+                @php
+                    $activePageName = 'Home';
+                    if (request()->routeIs('features')) $activePageName = 'Features';
+                    elseif (request()->routeIs('pricing')) $activePageName = 'Pricing';
+                    elseif (request()->routeIs('how-it-works')) $activePageName = 'How It Works';
+                    elseif (request()->routeIs('about')) $activePageName = 'About';
+                    elseif (request()->routeIs('contact')) $activePageName = 'Contact';
+                    elseif (request()->routeIs('login')) $activePageName = 'Login';
+                    elseif (request()->routeIs('register')) $activePageName = 'Register';
+                    elseif (request()->routeIs('terms')) $activePageName = 'Terms';
+                    elseif (request()->routeIs('privacy')) $activePageName = 'Privacy';
+                @endphp
+                <div class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 text-xs font-black shadow-sm tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                    <span>{{ $activePageName }}</span>
+                </div>
             </div>
             
-            <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
-                <a href="{{ route('features') }}" class="hover:text-slate-900 transition">Features</a>
-                <a href="{{ route('pricing') }}" class="hover:text-slate-900 transition">Pricing</a>
-                <a href="{{ route('how-it-works') }}" class="hover:text-slate-900 transition">How It Works</a>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-bold">
+                <a href="/" class="transition py-1 {{ request()->is('/') ? 'text-sky-600 font-black border-b-2 border-sky-600' : 'text-slate-600 hover:text-slate-900' }}">Home</a>
+                <a href="{{ route('features') }}" class="transition py-1 {{ request()->routeIs('features') ? 'text-sky-600 font-black border-b-2 border-sky-600' : 'text-slate-600 hover:text-slate-900' }}">Features</a>
+                <a href="{{ route('pricing') }}" class="transition py-1 {{ request()->routeIs('pricing') ? 'text-sky-600 font-black border-b-2 border-sky-600' : 'text-slate-600 hover:text-slate-900' }}">Pricing</a>
+                <a href="{{ route('how-it-works') }}" class="transition py-1 {{ request()->routeIs('how-it-works') ? 'text-sky-600 font-black border-b-2 border-sky-600' : 'text-slate-600 hover:text-slate-900' }}">How It Works</a>
             </nav>
 
             <div class="flex items-center gap-4">

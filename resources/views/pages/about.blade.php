@@ -5,7 +5,7 @@
 @section('content')
 <section class="py-20 bg-white">
     <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-4xl font-extrabold text-slate-900 mb-6">About QR Identity</h1>
+        <h1 class="text-4xl font-black text-sky-600 mb-6">About QR Identity</h1>
         <p class="text-lg text-slate-600 leading-relaxed mb-6">
             QR Identity is a modern SaaS platform designed to help professionals, businesses, creators, and freelancers manage their digital social identity through dynamic QR codes.
         </p>

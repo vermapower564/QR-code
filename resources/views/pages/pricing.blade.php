@@ -5,7 +5,7 @@
 @section('content')
 <section class="py-20 bg-slate-50">
     <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-4xl font-extrabold text-slate-900">Simple, Transparent Pricing</h1>
+        <h1 class="text-4xl font-black text-sky-600">Simple, Transparent Pricing</h1>
         <p class="mt-3 text-slate-600">Choose the perfect plan for your personal or business dynamic QR profile.</p>
 
         <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">

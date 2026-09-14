@@ -1,4 +1,4 @@
-﻿@extends('layouts.public')
+@extends('layouts.public')
 
 @section('title', 'How It Works - QR Identity')
 
@@ -6,7 +6,7 @@
 <section class="py-20 bg-slate-50 min-h-[80vh]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">How It Works</h1>
+            <h1 class="text-4xl md:text-5xl font-black text-sky-600 tracking-tight">How It Works</h1>
             <p class="mt-4 text-lg text-slate-600">Get your dynamic QR profile running in under 2 minutes. Follow these simple steps.</p>
         </div>
 
