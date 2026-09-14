@@ -39,6 +39,7 @@ use App\Http\Controllers\WebhookController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [PublicProfileController::class, 'home'])->name('home');
+Route::get('/qr/download-instant', [PublicProfileController::class, 'downloadInstantQr'])->name('qr.download.instant');
 Route::get('/features', [PageController::class, 'features'])->name('features');
 Route::get('/how-it-works', [PageController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');

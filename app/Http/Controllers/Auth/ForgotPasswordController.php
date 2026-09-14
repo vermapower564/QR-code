@@ -24,7 +24,7 @@ class ForgotPasswordController extends Controller
         }
 
         $request->validate([
-            'email' => ['required', 'email:rfc,dns', 'exists:users,email']
+            'email' => ['required', 'email', 'exists:users,email']
         ], [
             'email.required' => 'Email is required.',
             'email.email' => 'Please enter a valid email address.',

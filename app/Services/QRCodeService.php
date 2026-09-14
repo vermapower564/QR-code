@@ -20,6 +20,32 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class QRCodeService
 {
     /**
+     * Generate raw QR code content (SVG or PNG string) for arbitrary data.
+     */
+    public function generateRawString(string $data, string $format = 'svg', string $fgColor = '#000000', string $bgColor = '#ffffff', int $size = 512): string
+    {
+        $fgRgb = $this->hexToRgb($fgColor);
+        $bgRgb = $this->hexToRgb($bgColor);
+
+        if (class_exists(EndroidQrCode::class)) {
+            $hasRaster = extension_loaded('gd') || extension_loaded('imagick');
+            $writer = ($format === 'png' && $hasRaster) ? new PngWriter() : new SvgWriter();
+            $builder = new EndroidQrCode(
+                data: $data,
+                encoding: new Encoding('UTF-8'),
+                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                size: $size,
+                margin: 10,
+                foregroundColor: new Color($fgRgb['r'], $fgRgb['g'], $fgRgb['b']),
+                backgroundColor: new Color($bgRgb['r'], $bgRgb['g'], $bgRgb['b'])
+            );
+            return $writer->write($builder)->getString();
+        }
+
+        return $this->generateFallbackSvg($data, $fgColor, $bgColor, $size);
+    }
+
+    /**
      * Generate or update QR Code for a profile.
      * The QR encodes ONLY the dynamic profile URL: https://domain.com/p/{slug}
      */

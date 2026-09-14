@@ -25,6 +25,24 @@ class PublicProfileController extends Controller
         return view('home.index');
     }
 
+    public function downloadInstantQr(Request $request)
+    {
+        $data = (string) $request->input('data', config('app.url', 'https://qrsocialsaas.com'));
+        $hasRaster = extension_loaded('gd') || extension_loaded('imagick');
+        $format = ($request->input('format') === 'png' && $hasRaster) ? 'png' : 'svg';
+        $fg = (string) $request->input('fg', '#000000');
+        $bg = (string) $request->input('bg', '#ffffff');
+
+        $qrService = app(\App\Services\QRCodeService::class);
+        $output = $qrService->generateRawString($data, $format, $fg, $bg);
+
+        $contentType = ($format === 'png') ? 'image/png' : 'image/svg+xml';
+        return response($output, 200, [
+            'Content-Type' => $contentType,
+            'Content-Disposition' => 'attachment; filename="qrcode-' . time() . '.' . $format . '"',
+        ]);
+    }
+
     public function show(string $slug, Request $request)
     {
         $slugLower = strtolower(trim($slug));
