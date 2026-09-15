@@ -6,13 +6,14 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Http\Request;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
         $middleware->redirectGuestsTo(fn () => route('login', ['auth_required' => 1]));
     })
@@ -45,6 +46,13 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->withInput($request->except(['_token', 'password', 'password_confirmation', 'profile_image', 'logo']))
                     ->with('error', 'Your page session expired. All your form inputs have been saved — please click submit again.');
             }
-        });
     })->create();
+
+if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (env('APP_ENV') === 'production')) {
+    \Illuminate\Support\Facades\URL::forceScheme('https');
+}
+
+return $app;
 

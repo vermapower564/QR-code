@@ -312,7 +312,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('login') }}" method="POST" @submit="submittingLogin = true" class="space-y-4">
+                        <form action="{{ route('login', [], false) }}" method="POST" @submit="submittingLogin = true" class="space-y-4">
                             @csrf
                             
                             <!-- Email ID Input -->

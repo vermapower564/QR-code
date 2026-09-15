@@ -41,7 +41,7 @@
             </div>
         @endif
 
-        <form action="{{ route('register') }}" method="POST" @submit="submitting = true" class="space-y-4">
+        <form action="{{ route('register', [], false) }}" method="POST" @submit="submitting = true" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name *</label>

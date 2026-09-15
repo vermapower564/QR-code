@@ -52,7 +52,7 @@
         @endif
 
         <!-- Login Form Box -->
-        <form action="{{ route('login') }}" method="POST" @submit="submitting = true" class="space-y-4">
+        <form action="{{ route('login', [], false) }}" method="POST" @submit="submitting = true" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
