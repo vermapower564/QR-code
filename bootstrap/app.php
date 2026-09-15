@@ -49,11 +49,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
-if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
-    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
-    (env('APP_ENV') === 'production')) {
-    \Illuminate\Support\Facades\URL::forceScheme('https');
-}
+$app->booted(function () {
+    if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+        (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+        (env('APP_ENV') === 'production')) {
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+    }
+});
 
 return $app;
 
