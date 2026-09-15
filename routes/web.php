@@ -50,6 +50,12 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/cookie-policy', [PageController::class, 'cookiePolicy'])->name('cookie-policy');
 Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('refund-policy');
+Route::get('/session/keep-alive', function () {
+    return response()->json([
+        'status' => 'ok',
+        'csrf' => csrf_token(),
+    ]);
+})->name('session.keep-alive');
 
 /*
 |--------------------------------------------------------------------------

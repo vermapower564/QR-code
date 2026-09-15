@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Global Smart Navigation Helper (Back & Next) for QR Identity SaaS
  */
 function navigateApp(direction) {
@@ -82,3 +82,47 @@ function navigateApp(direction) {
         }
     }
 }
+
+/**
+ * Background Session Keep-Alive & CSRF Token Synchronizer
+ * Keeps sessions active while users are typing and auto-refreshes tokens
+ */
+(function () {
+    let lastPing = Date.now();
+
+    function syncSession() {
+        fetch('/session/keep-alive', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data && data.csrf) {
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta) meta.setAttribute('content', data.csrf);
+
+                const forms = document.querySelectorAll('form');
+                forms.forEach(function (form) {
+                    const tokenInput = form.querySelector('input[name="_token"]');
+                    if (tokenInput) {
+                        tokenInput.value = data.csrf;
+                    }
+                });
+            }
+            lastPing = Date.now();
+        })
+        .catch(function () {});
+    }
+
+    // Ping every 5 minutes to prevent session expiration
+    setInterval(syncSession, 5 * 60 * 1000);
+
+    // If tab was left open in background and user comes back after 10 minutes, sync immediately
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && (Date.now() - lastPing > 10 * 60 * 1000)) {
+            syncSession();
+        }
+    });
+})();
