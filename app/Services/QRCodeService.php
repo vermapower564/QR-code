@@ -68,12 +68,19 @@ class QRCodeService
         
         // Endroid QR Code Builder Integration with fallback
         if (class_exists(EndroidQrCode::class)) {
-            $writer = ($format === 'svg') ? new SvgWriter() : new PngWriter();
+            $hasRaster = extension_loaded('gd') || extension_loaded('imagick');
+            $writer = ($format === 'png' && $hasRaster) ? new PngWriter() : new SvgWriter();
+            if ($format === 'png' && !$hasRaster) {
+                $format = 'svg';
+            }
             
+            // Use High error correction only if embedding a center logo, otherwise Medium is 3x faster
+            $errorCorrection = $logoPath ? ErrorCorrectionLevel::High : ErrorCorrectionLevel::Medium;
+
             $builder = new EndroidQrCode(
                 data: $profileUrl,
                 encoding: new Encoding('UTF-8'),
-                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                errorCorrectionLevel: $errorCorrection,
                 size: $size,
                 margin: 10,
                 foregroundColor: new Color($fgRgb['r'], $fgRgb['g'], $fgRgb['b']),

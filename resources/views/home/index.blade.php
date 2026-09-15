@@ -610,28 +610,57 @@ function homeExperience() {
             return 'https://qrsocialsaas.com';
         },
 
-        updateQr() {
+        _debounceTimer: null,
+        _lastFg: null,
+        _lastBg: null,
+
+        updateQr(immediate = false) {
             const payload = this.computePayload();
             this.encodedData = payload;
 
+            clearTimeout(this._debounceTimer);
+            if (immediate) {
+                this._renderQr();
+            } else {
+                this._debounceTimer = setTimeout(() => {
+                    this._renderQr();
+                }, 40);
+            }
+        },
+
+        _renderQr() {
             const container = document.getElementById('live-qr-canvas');
             if (!container) return;
 
-            // Clear previous QR element
-            container.innerHTML = '';
-
             if (typeof QRCode !== 'undefined') {
                 try {
+                    if (this.qrInstance && this._lastFg === this.fgColor && this._lastBg === this.bgColor && container.querySelector('canvas')) {
+                        this.qrInstance.clear();
+                        this.qrInstance.makeCode(this.encodedData);
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    this._lastFg = this.fgColor;
+                    this._lastBg = this.bgColor;
                     this.qrInstance = new QRCode(container, {
-                        text: payload,
+                        text: this.encodedData,
                         width: 200,
                         height: 200,
                         colorDark: this.fgColor,
                         colorLight: this.bgColor,
-                        correctLevel: QRCode.CorrectLevel.H
+                        correctLevel: QRCode.CorrectLevel.M
                     });
                 } catch (e) {
-                    console.error('Error rendering QRCode:', e);
+                    container.innerHTML = '';
+                    this.qrInstance = new QRCode(container, {
+                        text: this.encodedData,
+                        width: 200,
+                        height: 200,
+                        colorDark: this.fgColor,
+                        colorLight: this.bgColor,
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
                 }
             } else {
                 container.innerHTML = '<p class="text-xs text-slate-400">Loading QR library...</p>';
@@ -645,14 +674,14 @@ function homeExperience() {
             const canvas = container.querySelector('canvas');
             if (canvas) {
                 const link = document.createElement('a');
-                link.download = 'my-qr-code.png';
+                link.download = 'instant-qr.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             } else {
                 const img = container.querySelector('img');
                 if (img && img.src) {
                     const link = document.createElement('a');
-                    link.download = 'my-qr-code.png';
+                    link.download = 'instant-qr.png';
                     link.href = img.src;
                     link.click();
                 }
@@ -660,6 +689,20 @@ function homeExperience() {
         },
 
         downloadSvg() {
+            const container = document.getElementById('live-qr-canvas');
+            const svgEl = container ? container.querySelector('svg') : null;
+            if (svgEl) {
+                const svgXml = (new XMLSerializer()).serializeToString(svgEl);
+                const blob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'instant-qr.svg';
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+                return;
+            }
+
             const payload = encodeURIComponent(this.encodedData);
             const fg = encodeURIComponent(this.fgColor);
             const bg = encodeURIComponent(this.bgColor);

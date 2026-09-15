@@ -19,11 +19,49 @@
          bioMax: 500,
          avatarPreview: null,
          logoPreview: null,
+         manuallyEditedSlug: {{ old('username') ? 'true' : 'false' }},
+         _qrDebounce: null,
          
          init() {
              window.addEventListener('popstate', () => {
                  this.step = parseInt(new URLSearchParams(window.location.search).get('step')) || 1;
              });
+             this.$nextTick(() => {
+                 this.updatePreviewQr();
+             });
+         },
+         onNameChange() {
+             if (!this.manuallyEditedSlug) {
+                 this.username = this.name.toLowerCase()
+                     .trim()
+                     .replace(/[^a-z0-9]+/g, '-')
+                     .replace(/^-+|-+$/g, '')
+                     .slice(0, 40);
+             }
+             this.updatePreviewQr();
+         },
+         updatePreviewQr() {
+             clearTimeout(this._qrDebounce);
+             this._qrDebounce = setTimeout(() => {
+                 const container = document.getElementById('phone-preview-qr');
+                 if (!container) return;
+                 container.innerHTML = '';
+                 const targetUrl = window.location.origin + '/p/' + (this.username || 'preview');
+                 if (typeof QRCode !== 'undefined') {
+                     try {
+                         new QRCode(container, {
+                             text: targetUrl,
+                             width: 110,
+                             height: 110,
+                             colorDark: '#0f172a',
+                             colorLight: '#ffffff',
+                             correctLevel: QRCode.CorrectLevel.M
+                         });
+                     } catch(e) {
+                         console.error(e);
+                     }
+                 }
+             }, 60);
          },
          handleAvatar(e) {
              if(e.target.files.length > 0) {
@@ -112,7 +150,7 @@
                                 <label class="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-2">Full Name <span class="text-rose-500">*</span></label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="fa-regular fa-id-badge"></i></div>
-                                    <input type="text" name="name" x-model="name" placeholder="John Doe" required class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-semibold text-slate-900 transition-all outline-none"/>
+                                    <input type="text" name="name" x-model="name" @input="onNameChange()" placeholder="John Doe" required class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-semibold text-slate-900 transition-all outline-none"/>
                                 </div>
                             </div>
 
@@ -120,7 +158,7 @@
                                 <label class="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-2">Username / Slug <span class="text-rose-500">*</span></label>
                                 <div class="flex rounded-xl border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-sky-500 overflow-hidden transition-all shadow-sm">
                                     <span class="px-4 py-3.5 text-slate-400 text-sm font-mono border-r border-slate-200 bg-slate-100 flex items-center">domain.com/p/</span>
-                                    <input type="text" name="username" x-model="username" placeholder="john-doe" required class="w-full px-4 py-3.5 bg-transparent text-sm font-semibold text-slate-900 outline-none border-none"/>
+                                    <input type="text" name="username" x-model="username" @input="manuallyEditedSlug = true; updatePreviewQr()" placeholder="john-doe" required class="w-full px-4 py-3.5 bg-transparent text-sm font-semibold text-slate-900 outline-none border-none"/>
                                 </div>
                             </div>
 
@@ -268,14 +306,22 @@
                     </div>
 
                     <!-- Navigation Controls -->
-                    <div class="pt-8 border-t border-slate-100 flex items-center justify-between">
+                    <div class="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                         <button type="button" @click="prevStep()" :class="step === 1 ? 'invisible' : ''" :disabled="submitting" class="px-5 py-2.5 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition text-sm flex items-center gap-2">
                             <i class="fa-solid fa-arrow-left text-xs"></i> Back
                         </button>
 
-                        <button type="button" x-show="step < totalSteps" @click="nextStep()" :disabled="!canGoNext() || submitting" class="px-8 py-3 font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-md shadow-sky-600/20 transition-all text-sm flex items-center gap-2">
-                            Continue <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <!-- Fast Submit button from Step 1 or 2 -->
+                            <button type="submit" x-show="step < totalSteps && canGoNext()" :disabled="submitting" class="px-5 py-2.5 font-black text-xs text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-md transition flex items-center gap-1.5 transform hover:-translate-y-0.5">
+                                <i class="fa-solid fa-bolt text-amber-400"></i>
+                                <span>⚡ Fast Create QR</span>
+                            </button>
+
+                            <button type="button" x-show="step < totalSteps" @click="nextStep()" :disabled="!canGoNext() || submitting" class="px-7 py-3 font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-md shadow-sky-600/20 transition-all text-sm flex items-center gap-2">
+                                Continue <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -285,7 +331,7 @@
         <div class="lg:col-span-5 hidden lg:block">
             <div class="sticky top-10 flex justify-center">
                 <!-- Phone Mockup Frame -->
-                <div class="w-[320px] h-[650px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl relative border-8 border-slate-800 flex flex-col overflow-hidden">
+                <div class="w-[320px] h-[670px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl relative border-8 border-slate-800 flex flex-col overflow-hidden">
                     <!-- Notch -->
                     <div class="absolute top-0 inset-x-0 h-6 bg-slate-800 w-40 mx-auto rounded-b-3xl z-20"></div>
                     
@@ -314,34 +360,37 @@
                             <p class="text-[11px] text-slate-500 mt-3 max-w-[200px] leading-relaxed break-words" x-text="bio || 'Your bio will appear here...'"></p>
                         </div>
                         
-                        <!-- Links Preview -->
-                        <div class="flex-1 bg-slate-50 p-5 space-y-3 z-10 overflow-y-auto">
+                        <!-- Links & QR Preview -->
+                        <div class="flex-1 bg-slate-50 p-4 space-y-3 z-10 overflow-y-auto">
+                            <!-- Live Instant Dynamic QR Code Card -->
+                            <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
+                                <span class="text-[9px] font-black uppercase tracking-wider text-sky-600 mb-1.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-bolt text-amber-500"></i> Dynamic QR Preview
+                                </span>
+                                <div id="phone-preview-qr" class="w-[110px] h-[110px] flex items-center justify-center bg-slate-50 p-1 rounded-xl border border-slate-100 shadow-inner"></div>
+                                <span class="text-[9px] font-mono text-slate-400 mt-1.5 truncate max-w-[160px]">/p/<span x-text="username || 'your-slug'"></span></span>
+                            </div>
+
                             <!-- Mock buttons based on input -->
                             <template x-if="phone">
-                                <div class="w-full bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
+                                <div class="w-full bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
                                     <i class="fa-solid fa-phone text-emerald-500"></i> Call Me
                                 </div>
                             </template>
                             <template x-if="email">
-                                <div class="w-full bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
+                                <div class="w-full bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
                                     <i class="fa-solid fa-envelope text-sky-500"></i> Email Me
                                 </div>
                             </template>
                             <template x-if="website">
-                                <div class="w-full bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
+                                <div class="w-full bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-slate-700 text-xs font-bold">
                                     <i class="fa-solid fa-globe text-indigo-500"></i> Website
                                 </div>
                             </template>
-                            
-                            <!-- Static mockup buttons for aesthetics -->
-                            <div class="opacity-40 space-y-3 pt-2">
-                                <div class="w-full bg-slate-200 h-10 rounded-2xl"></div>
-                                <div class="w-full bg-slate-200 h-10 rounded-2xl"></div>
-                            </div>
                         </div>
 
                         <!-- Footer -->
-                        <div class="absolute bottom-0 w-full py-4 text-center bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none">
+                        <div class="absolute bottom-0 w-full py-3 text-center bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none">
                             <span class="text-[10px] font-black tracking-widest text-slate-300 uppercase">QR Identity</span>
                         </div>
                     </div>
@@ -353,6 +402,17 @@
                     <span class="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded-lg">/p/<span x-text="username || '...' "></span></span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Instant Submission Loading Overlay -->
+    <div x-show="submitting" style="display: none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-4 border border-slate-100">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center text-2xl mx-auto shadow-lg shadow-sky-500/30">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-900">Creating Your Dynamic QR</h3>
+            <p class="text-xs text-slate-500">Generating dynamic profile & scannable QR code immediately...</p>
         </div>
     </div>
 </div>
