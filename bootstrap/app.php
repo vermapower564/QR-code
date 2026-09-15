@@ -14,6 +14,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\CheckAdmin::class,
+        ]);
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
         $middleware->redirectGuestsTo(fn () => route('login', ['auth_required' => 1]));
     })

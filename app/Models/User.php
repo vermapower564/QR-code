@@ -53,6 +53,11 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
         return $this->hasMany(QRProfile::class);
     }
 
+    public function profiles()
+    {
+        return $this->hasMany(QRProfile::class);
+    }
+
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);

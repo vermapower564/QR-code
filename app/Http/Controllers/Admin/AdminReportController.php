@@ -15,7 +15,7 @@ class AdminReportController extends Controller
     public function index()
     {
         $scanStatsByBrowser = QRScan::selectRaw('browser, count(*) as count')->groupBy('browser')->orderByDesc('count')->take(5)->get();
-        $scanStatsByDevice = QRScan::selectRaw('device_type, count(*) as count')->groupBy('device_type')->orderByDesc('count')->take(5)->get();
+        $scanStatsByDevice = QRScan::selectRaw('device as device_type, count(*) as count')->groupBy('device')->orderByDesc('count')->take(5)->get();
         $scanStatsByCountry = QRScan::selectRaw('country, count(*) as count')->groupBy('country')->orderByDesc('count')->take(5)->get();
 
         return view('admin.reports.index', compact('scanStatsByBrowser', 'scanStatsByDevice', 'scanStatsByCountry'));
@@ -47,7 +47,7 @@ class AdminReportController extends Controller
                 fputcsv($handle, ['ID', 'Profile ID', 'IP Hash', 'Device', 'Browser', 'Country', 'Scanned At']);
                 QRScan::chunk(100, function($scans) use ($handle) {
                     foreach ($scans as $scan) {
-                        fputcsv($handle, [$scan->id, $scan->profile_id, $scan->ip_hash, $scan->device_type, $scan->browser, $scan->country, $scan->created_at]);
+                        fputcsv($handle, [$scan->id, $scan->profile_id, $scan->ip_hash, $scan->device ?? $scan->device_type, $scan->browser, $scan->country, $scan->created_at]);
                     }
                 });
             }

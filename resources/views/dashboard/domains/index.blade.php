@@ -76,6 +76,7 @@
                                 </form>
                             </div>
                         </div>
+                    @endforeach
                 </div>
                 <div class="mt-4">
                     {{ $domains->links('vendor.pagination.custom') }}
