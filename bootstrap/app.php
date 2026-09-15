@@ -46,6 +46,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     ->withInput($request->except(['_token', 'password', 'password_confirmation', 'profile_image', 'logo']))
                     ->with('error', 'Your page session expired. All your form inputs have been saved — please click submit again.');
             }
+        });
     })->create();
 
 if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
