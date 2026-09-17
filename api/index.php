@@ -17,7 +17,7 @@ if (is_dir(__DIR__ . '/../user/app')) {
 // 1. Directly serve public static assets if requested through the serverless function
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $requestPath = urldecode($requestPath);
-if ($requestPath !== '/' && !empty($requestPath)) {
+if ($requestPath !== '/' && !empty($requestPath) && !str_ends_with(strtolower($requestPath), '.php')) {
     $candidates = [
         $baseDir . '/public' . $requestPath,
         dirname(__DIR__) . '/public' . $requestPath,

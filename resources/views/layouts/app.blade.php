@@ -13,10 +13,11 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-    <!-- Tailwind CSS CDN Fallback + Vite Asset Pipeline -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vite Asset Pipeline with Tailwind CDN Fallback -->
     @if(file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
     @endif
 
     <!-- Alpine.js -->
