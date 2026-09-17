@@ -2,16 +2,21 @@
     "version": 2,
     "framework": null,
     "buildCommand": "npm run build",
-    "outputDirectory": "public",
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.7.3"
+            "runtime": "vercel-php@0.7.3",
+            "maxDuration": 30,
+            "memory": 1024
         }
     },
     "routes": [
         {
             "src": "/build/(.*)",
             "dest": "/public/build/$1"
+        },
+        {
+            "src": "/js/(.*)",
+            "dest": "/public/js/$1"
         },
         {
             "src": "/storage/(.*)",
@@ -26,6 +31,10 @@
             "dest": "/public/robots.txt"
         },
         {
+            "src": "/(.*\\.(?:css|js|ico|txt|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|webp))",
+            "dest": "/public/$1"
+        },
+        {
             "src": "/(.*)",
             "dest": "/api/index.php"
         }
@@ -33,16 +42,13 @@
     "env": {
         "APP_KEY": "base64:f0yGwnjHurwHkn9ci6msbqcwlFReY35XQrQdz+mmY1o=",
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
         "APP_ROUTES_CACHE": "/tmp/routes.php",
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
-        "CACHE_STORE": "database",
-        "SESSION_DRIVER": "database",
-        "LOG_CHANNEL": "stderr",
-        "DB_CONNECTION": "mysql"
+        "LOG_CHANNEL": "stderr"
     }
 }

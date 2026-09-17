@@ -20,16 +20,30 @@ if (!getenv('APP_ENV')) {
     $_SERVER['APP_ENV'] = 'production';
 }
 
-// 3. Dynamic APP_URL detection from Vercel domain
-if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && (!getenv('APP_URL') || getenv('APP_URL') === 'http://127.0.0.1:8000' || getenv('APP_URL') === 'http://localhost')) {
-    $proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https' : 'http';
-    $detectedUrl = $proto . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'];
+// 3. Dynamic APP_URL and ASSET_URL detection from Vercel domain
+$host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? null;
+if ($host && (!getenv('APP_URL') || getenv('APP_URL') === 'http://127.0.0.1:8000' || getenv('APP_URL') === 'http://localhost')) {
+    if (str_contains($host, ',')) {
+        $host = trim(explode(',', $host)[0]);
+    }
+    $proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+             (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https' : 'http';
+    $detectedUrl = "{$proto}://{$host}";
     putenv("APP_URL={$detectedUrl}");
     $_ENV['APP_URL'] = $detectedUrl;
     $_SERVER['APP_URL'] = $detectedUrl;
+    putenv("ASSET_URL={$detectedUrl}");
+    $_ENV['ASSET_URL'] = $detectedUrl;
+    $_SERVER['ASSET_URL'] = $detectedUrl;
 }
 
-// 4. Ensure writable storage directories in /tmp for Vercel serverless environment
+// 4. Clean up Vite dev hot file if it accidentally exists
+$hotFile = dirname(__DIR__) . '/public/hot';
+if (file_exists($hotFile)) {
+    @unlink($hotFile);
+}
+
+// 5. Ensure writable storage directories in /tmp for Vercel serverless environment
 putenv('LARAVEL_STORAGE_PATH=/tmp/storage');
 $_ENV['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
 $_SERVER['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
@@ -51,7 +65,7 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-// 5. Ensure SSL CA certificate exists for TiDB Cloud MySQL connection
+// 6. Ensure SSL CA certificate exists for TiDB Cloud MySQL connection
 $bundledCa = dirname(__DIR__) . '/database/certs/ca.pem';
 if (file_exists($bundledCa)) {
     $currentCa = getenv('MYSQL_ATTR_SSL_CA');
@@ -62,8 +76,58 @@ if (file_exists($bundledCa)) {
     }
 }
 
-// 6. Ensure SQLite database fallback exists and is writable in /tmp
-if (getenv('DB_CONNECTION') === 'sqlite') {
+// 7. Configure Database Connection & Intelligent Fallback
+// Set TiDB Cloud defaults
+if (!getenv('DB_HOST')) {
+    putenv('DB_HOST=gateway01.ap-southeast-1.prod.aws.tidbcloud.com');
+    $_ENV['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
+    $_SERVER['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
+}
+if (!getenv('DB_PORT')) {
+    putenv('DB_PORT=4000');
+    $_ENV['DB_PORT'] = '4000';
+    $_SERVER['DB_PORT'] = '4000';
+}
+if (!getenv('DB_DATABASE')) {
+    putenv('DB_DATABASE=qr_social');
+    $_ENV['DB_DATABASE'] = 'qr_social';
+    $_SERVER['DB_DATABASE'] = 'qr_social';
+}
+if (!getenv('DB_USERNAME')) {
+    putenv('DB_USERNAME=9DnYhSCY9Rj7SGv.root');
+    $_ENV['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
+    $_SERVER['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
+}
+
+$dbPassword = getenv('DB_PASSWORD');
+if (!empty($dbPassword) && trim($dbPassword) !== '') {
+    // When DB_PASSWORD is provided on Vercel, connect to TiDB Cloud MySQL
+    putenv('DB_CONNECTION=mysql');
+    $_ENV['DB_CONNECTION'] = 'mysql';
+    $_SERVER['DB_CONNECTION'] = 'mysql';
+
+    putenv('SESSION_DRIVER=database');
+    $_ENV['SESSION_DRIVER'] = 'database';
+    $_SERVER['SESSION_DRIVER'] = 'database';
+
+    putenv('CACHE_STORE=database');
+    $_ENV['CACHE_STORE'] = 'database';
+    $_SERVER['CACHE_STORE'] = 'database';
+} else {
+    // If DB_PASSWORD has not yet been configured in Vercel settings,
+    // seamlessly fall back to SQLite in /tmp so the site works without 500 errors
+    putenv('DB_CONNECTION=sqlite');
+    $_ENV['DB_CONNECTION'] = 'sqlite';
+    $_SERVER['DB_CONNECTION'] = 'sqlite';
+
+    putenv('SESSION_DRIVER=cookie');
+    $_ENV['SESSION_DRIVER'] = 'cookie';
+    $_SERVER['SESSION_DRIVER'] = 'cookie';
+
+    putenv('CACHE_STORE=array');
+    $_ENV['CACHE_STORE'] = 'array';
+    $_SERVER['CACHE_STORE'] = 'array';
+
     $tmpDb = '/tmp/database.sqlite';
     if (!file_exists($tmpDb) || filesize($tmpDb) === 0) {
         $bundledDb = dirname(__DIR__) . '/database/database.sqlite';
@@ -81,6 +145,6 @@ if (getenv('DB_CONNECTION') === 'sqlite') {
     $_SERVER['DB_DATABASE'] = $tmpDb;
 }
 
-// 7. Forward to public/index.php
+// 8. Forward to public/index.php
 require dirname(__DIR__) . '/public/index.php';
 
