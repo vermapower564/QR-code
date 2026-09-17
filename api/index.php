@@ -1,9 +1,17 @@
 <?php
 
-// 1. Force HTTPS detection for Vercel serverless proxy
+// 1. Force HTTPS and Client IP detection for Vercel serverless proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
     $_SERVER['HTTPS'] = 'on';
     $_SERVER['SERVER_PORT'] = 443;
+}
+
+if (empty($_SERVER['REMOTE_ADDR'])) {
+    $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? '127.0.0.1';
+    if (str_contains($clientIp, ',')) {
+        $clientIp = trim(explode(',', $clientIp)[0]);
+    }
+    $_SERVER['REMOTE_ADDR'] = !empty($clientIp) ? $clientIp : '127.0.0.1';
 }
 
 // 2. Ensure APP_KEY exists for encryption/sessions on Vercel
