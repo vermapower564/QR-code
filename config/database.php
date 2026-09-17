@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => env('DB_DATABASE', file_exists('/tmp/database.sqlite') ? '/tmp/database.sqlite' : database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             'busy_timeout' => null,
@@ -59,10 +59,26 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA') ?: (file_exists(base_path('database/certs/ca.pem')) ? base_path('database/certs/ca.pem') : null),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? (function () {
+                $caPath = null;
+                foreach ([
+                    env('MYSQL_ATTR_SSL_CA'),
+                    base_path('database/certs/ca.pem'),
+                    dirname(base_path()) . '/database/certs/ca.pem',
+                    '/var/task/user/database/certs/ca.pem',
+                    '/var/task/database/certs/ca.pem',
+                ] as $candidate) {
+                    if ($candidate && file_exists($candidate)) {
+                        $caPath = $candidate;
+                        break;
+                    }
+                }
+                $opts = [];
+                if ($caPath) {
+                    $opts[PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+                }
+                return $opts;
+            })() : [],
         ],
 
         'mariadb' => [

@@ -180,82 +180,17 @@ if (empty($dbUser) || $dbUser == 'root') {
     $_SERVER['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
 }
 
-$dbPassword = getenv('DB_PASSWORD');
-$useMysql = false;
+putenv('DB_CONNECTION=mysql');
+$_ENV['DB_CONNECTION'] = 'mysql';
+$_SERVER['DB_CONNECTION'] = 'mysql';
 
-if (!empty($dbPassword) && trim($dbPassword) !== '') {
-    try {
-        $dsn = "mysql:host=" . getenv('DB_HOST') . ";port=" . getenv('DB_PORT') . ";dbname=" . getenv('DB_DATABASE');
-        $opts = [
-            PDO::ATTR_TIMEOUT => 3,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        ];
-        if ($bundledCa && file_exists($bundledCa)) {
-            $opts[PDO::MYSQL_ATTR_SSL_CA] = $bundledCa;
-            $opts[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-        }
-        $pdoTest = new PDO($dsn, getenv('DB_USERNAME'), $dbPassword, $opts);
-        $useMysql = true;
-    } catch (\Throwable $e) {
-        $useMysql = false;
-    }
-}
+putenv('SESSION_DRIVER=file');
+$_ENV['SESSION_DRIVER'] = 'file';
+$_SERVER['SESSION_DRIVER'] = 'file';
 
-if ($useMysql) {
-    putenv('DB_CONNECTION=mysql');
-    $_ENV['DB_CONNECTION'] = 'mysql';
-    $_SERVER['DB_CONNECTION'] = 'mysql';
-
-    putenv('SESSION_DRIVER=database');
-    $_ENV['SESSION_DRIVER'] = 'database';
-    $_SERVER['SESSION_DRIVER'] = 'database';
-
-    putenv('CACHE_STORE=database');
-    $_ENV['CACHE_STORE'] = 'database';
-    $_SERVER['CACHE_STORE'] = 'database';
-} else {
-    // If TiDB is unavailable or credentials not yet verified, fall back to SQLite
-    putenv('DB_CONNECTION=sqlite');
-    $_ENV['DB_CONNECTION'] = 'sqlite';
-    $_SERVER['DB_CONNECTION'] = 'sqlite';
-
-    putenv('SESSION_DRIVER=cookie');
-    $_ENV['SESSION_DRIVER'] = 'cookie';
-    $_SERVER['SESSION_DRIVER'] = 'cookie';
-
-    putenv('CACHE_STORE=array');
-    $_ENV['CACHE_STORE'] = 'array';
-    $_SERVER['CACHE_STORE'] = 'array';
-
-    $dbCandidates = [
-        $baseDir . '/database/database.sqlite',
-        dirname(__DIR__) . '/database/database.sqlite',
-        '/var/task/user/database/database.sqlite',
-        '/var/task/database/database.sqlite',
-    ];
-    $bundledDb = null;
-    foreach ($dbCandidates as $dbPath) {
-        if (file_exists($dbPath) && is_file($dbPath)) {
-            $bundledDb = $dbPath;
-            break;
-        }
-    }
-
-    $tmpDb = '/tmp/database.sqlite';
-    if (!file_exists($tmpDb) || filesize($tmpDb) === 0) {
-        if ($bundledDb && file_exists($bundledDb) && filesize($bundledDb) > 0) {
-            @copy($bundledDb, $tmpDb);
-        } else {
-            @touch($tmpDb);
-        }
-    }
-    if (file_exists($tmpDb)) {
-        @chmod($tmpDb, 0666);
-    }
-    putenv("DB_DATABASE={$tmpDb}");
-    $_ENV['DB_DATABASE'] = $tmpDb;
-    $_SERVER['DB_DATABASE'] = $tmpDb;
-}
+putenv('CACHE_STORE=file');
+$_ENV['CACHE_STORE'] = 'file';
+$_SERVER['CACHE_STORE'] = 'file';
 
 // 9. Forward to public/index.php
 $publicIndexCandidates = [

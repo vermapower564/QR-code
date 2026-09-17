@@ -6,10 +6,34 @@
         "api/index.php": {
             "runtime": "vercel-php@0.7.3",
             "maxDuration": 30,
-            "memory": 1024
+            "memory": 1024,
+            "includeFiles": "{public/**,database/**,resources/**,bootstrap/**,config/**}"
         }
     },
     "routes": [
+        {
+            "src": "/js/(.*)",
+            "dest": "/public/js/$1"
+        },
+        {
+            "src": "/build/(.*)",
+            "dest": "/public/build/$1"
+        },
+        {
+            "src": "/storage/(.*)",
+            "dest": "/public/storage/$1"
+        },
+        {
+            "src": "/favicon.ico",
+            "dest": "/public/favicon.ico"
+        },
+        {
+            "src": "/robots.txt",
+            "dest": "/public/robots.txt"
+        },
+        {
+            "handle": "filesystem"
+        },
         {
             "src": "/(.*)",
             "dest": "/api/index.php"
@@ -25,6 +49,7 @@
         "APP_ROUTES_CACHE": "/tmp/routes.php",
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
+        "SESSION_DRIVER": "file",
         "LOG_CHANNEL": "stderr"
     }
 }
