@@ -1,5 +1,39 @@
 <?php
 
+// 0. Directly serve public static assets if requested through the serverless function
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$requestPath = urldecode($requestPath);
+if ($requestPath !== '/' && !empty($requestPath)) {
+    $staticFile = dirname(__DIR__) . '/public' . $requestPath;
+    if (is_file($staticFile)) {
+        $ext = strtolower(pathinfo($staticFile, PATHINFO_EXTENSION));
+        $mimes = [
+            'js' => 'application/javascript; charset=utf-8',
+            'mjs' => 'application/javascript; charset=utf-8',
+            'css' => 'text/css; charset=utf-8',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+            'json' => 'application/json',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf' => 'font/ttf',
+            'txt' => 'text/plain',
+            'webp' => 'image/webp',
+            'pdf' => 'application/pdf',
+        ];
+        $mime = $mimes[$ext] ?? 'application/octet-stream';
+        header("Content-Type: {$mime}");
+        header('Content-Length: ' . filesize($staticFile));
+        header('Cache-Control: public, max-age=31536000, immutable');
+        readfile($staticFile);
+        exit;
+    }
+}
+
 // 1. Force HTTPS and Client IP detection for Vercel serverless proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
     $_SERVER['HTTPS'] = 'on';
@@ -85,31 +119,54 @@ if (file_exists($bundledCa)) {
 }
 
 // 7. Configure Database Connection & Intelligent Fallback
-// Set TiDB Cloud defaults
-if (!getenv('DB_HOST')) {
+// TiDB Cloud defaults
+$dbHost = getenv('DB_HOST');
+if (empty($dbHost) || in_array($dbHost, ['localhost', '127.0.0.1', '::1'])) {
     putenv('DB_HOST=gateway01.ap-southeast-1.prod.aws.tidbcloud.com');
     $_ENV['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
     $_SERVER['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
 }
-if (!getenv('DB_PORT')) {
+$dbPort = getenv('DB_PORT');
+if (empty($dbPort) || $dbPort == '3306') {
     putenv('DB_PORT=4000');
     $_ENV['DB_PORT'] = '4000';
     $_SERVER['DB_PORT'] = '4000';
 }
-if (!getenv('DB_DATABASE')) {
+$dbName = getenv('DB_DATABASE');
+if (empty($dbName) || in_array($dbName, ['laravel', 'sys'])) {
     putenv('DB_DATABASE=qr_social');
     $_ENV['DB_DATABASE'] = 'qr_social';
     $_SERVER['DB_DATABASE'] = 'qr_social';
 }
-if (!getenv('DB_USERNAME')) {
+$dbUser = getenv('DB_USERNAME');
+if (empty($dbUser) || $dbUser == 'root') {
     putenv('DB_USERNAME=9DnYhSCY9Rj7SGv.root');
     $_ENV['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
     $_SERVER['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
 }
 
 $dbPassword = getenv('DB_PASSWORD');
+$useMysql = false;
+
 if (!empty($dbPassword) && trim($dbPassword) !== '') {
-    // When DB_PASSWORD is provided on Vercel, connect to TiDB Cloud MySQL
+    try {
+        $dsn = "mysql:host=" . getenv('DB_HOST') . ";port=" . getenv('DB_PORT') . ";dbname=" . getenv('DB_DATABASE');
+        $opts = [
+            PDO::ATTR_TIMEOUT => 3,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        ];
+        if (file_exists($bundledCa)) {
+            $opts[PDO::MYSQL_ATTR_SSL_CA] = $bundledCa;
+            $opts[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+        $pdoTest = new PDO($dsn, getenv('DB_USERNAME'), $dbPassword, $opts);
+        $useMysql = true;
+    } catch (\Throwable $e) {
+        $useMysql = false;
+    }
+}
+
+if ($useMysql) {
     putenv('DB_CONNECTION=mysql');
     $_ENV['DB_CONNECTION'] = 'mysql';
     $_SERVER['DB_CONNECTION'] = 'mysql';
@@ -122,8 +179,7 @@ if (!empty($dbPassword) && trim($dbPassword) !== '') {
     $_ENV['CACHE_STORE'] = 'database';
     $_SERVER['CACHE_STORE'] = 'database';
 } else {
-    // If DB_PASSWORD has not yet been configured in Vercel settings,
-    // seamlessly fall back to SQLite in /tmp so the site works without 500 errors
+    // If TiDB is unavailable or credentials not yet verified, fall back to SQLite
     putenv('DB_CONNECTION=sqlite');
     $_ENV['DB_CONNECTION'] = 'sqlite';
     $_SERVER['DB_CONNECTION'] = 'sqlite';

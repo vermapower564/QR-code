@@ -45,12 +45,14 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
+            'host' => (empty(env('DB_HOST')) || in_array(env('DB_HOST'), ['localhost', '127.0.0.1', '::1']))
+                ? 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com'
+                : env('DB_HOST'),
+            'port' => (empty(env('DB_PORT')) || env('DB_PORT') == '3306') ? '4000' : env('DB_PORT'),
+            'database' => (empty(env('DB_DATABASE')) || in_array(env('DB_DATABASE'), ['laravel', 'sys'])) ? 'qr_social' : env('DB_DATABASE'),
+            'username' => (empty(env('DB_USERNAME')) || env('DB_USERNAME') == 'root') ? '9DnYhSCY9Rj7SGv.root' : env('DB_USERNAME'),
             'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
+            'unix_socket' => '',
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
@@ -59,6 +61,7 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA') ?: (file_exists(base_path('database/certs/ca.pem')) ? base_path('database/certs/ca.pem') : null),
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
             ]) : [],
         ],
 
