@@ -52,6 +52,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
+if (env('LARAVEL_STORAGE_PATH')) {
+    $app->useStoragePath(env('LARAVEL_STORAGE_PATH'));
+}
+
 $app->booted(function () {
     if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
