@@ -51,7 +51,7 @@ return [
             'port' => (empty(env('DB_PORT')) || env('DB_PORT') == '3306') ? '4000' : env('DB_PORT'),
             'database' => (empty(env('DB_DATABASE')) || in_array(env('DB_DATABASE'), ['laravel', 'sys'])) ? 'qr_social' : env('DB_DATABASE'),
             'username' => (empty(env('DB_USERNAME')) || env('DB_USERNAME') == 'root') ? '9DnYhSCY9Rj7SGv.root' : env('DB_USERNAME'),
-            'password' => env('DB_PASSWORD', ''),
+            'password' => env('DB_PASSWORD', '2bPMSb9cN7pkmpoO'),
             'unix_socket' => '',
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
@@ -63,10 +63,13 @@ return [
                 $caPath = null;
                 foreach ([
                     env('MYSQL_ATTR_SSL_CA'),
+                    '/tmp/ca.pem',
                     base_path('database/certs/ca.pem'),
                     dirname(base_path()) . '/database/certs/ca.pem',
                     '/var/task/user/database/certs/ca.pem',
                     '/var/task/database/certs/ca.pem',
+                    '/etc/ssl/certs/ca-certificates.crt',
+                    '/etc/pki/tls/certs/ca-bundle.crt',
                 ] as $candidate) {
                     if ($candidate && file_exists($candidate)) {
                         $caPath = $candidate;
@@ -76,6 +79,7 @@ return [
                 $opts = [];
                 if ($caPath) {
                     $opts[PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+                    $opts[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
                 }
                 return $opts;
             })() : [],

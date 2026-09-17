@@ -6,8 +6,7 @@
         "api/index.php": {
             "runtime": "vercel-php@0.7.3",
             "maxDuration": 30,
-            "memory": 1024,
-            "includeFiles": "{public/**,database/**,resources/**,bootstrap/**,config/**}"
+            "memory": 1024
         }
     },
     "routes": [
@@ -47,6 +46,13 @@
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
         "SESSION_DRIVER": "file",
-        "LOG_CHANNEL": "stderr"
+        "LOG_CHANNEL": "stderr",
+        "DB_CONNECTION": "mysql",
+        "DB_HOST": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+        "DB_PORT": "4000",
+        "DB_DATABASE": "qr_social",
+        "DB_USERNAME": "9DnYhSCY9Rj7SGv.root",
+        "DB_PASSWORD": "2bPMSb9cN7pkmpoO",
+        "MYSQL_ATTR_SSL_CA": "/tmp/ca.pem"
     }
 }

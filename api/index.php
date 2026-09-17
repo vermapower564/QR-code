@@ -136,6 +136,8 @@ $caCandidates = [
     dirname(__DIR__) . '/database/certs/ca.pem',
     '/var/task/user/database/certs/ca.pem',
     '/var/task/database/certs/ca.pem',
+    '/etc/ssl/certs/ca-certificates.crt',
+    '/etc/pki/tls/certs/ca-bundle.crt',
 ];
 $bundledCa = null;
 foreach ($caCandidates as $caPath) {
@@ -145,65 +147,165 @@ foreach ($caCandidates as $caPath) {
     }
 }
 if ($bundledCa) {
-    $currentCa = getenv('MYSQL_ATTR_SSL_CA');
-    if (!$currentCa || !file_exists($currentCa)) {
-        putenv("MYSQL_ATTR_SSL_CA={$bundledCa}");
-        $_ENV['MYSQL_ATTR_SSL_CA'] = $bundledCa;
-        $_SERVER['MYSQL_ATTR_SSL_CA'] = $bundledCa;
-    }
+    @copy($bundledCa, '/tmp/ca.pem');
+    $activeCa = file_exists('/tmp/ca.pem') ? '/tmp/ca.pem' : $bundledCa;
+    putenv("MYSQL_ATTR_SSL_CA={$activeCa}");
+    $_ENV['MYSQL_ATTR_SSL_CA'] = $activeCa;
+    $_SERVER['MYSQL_ATTR_SSL_CA'] = $activeCa;
 }
 
 // 8. Configure Database Connection & Intelligent Fallback
-// TiDB Cloud defaults
 $dbHost = getenv('DB_HOST');
 if (empty($dbHost) || in_array($dbHost, ['localhost', '127.0.0.1', '::1'])) {
-    putenv('DB_HOST=gateway01.ap-southeast-1.prod.aws.tidbcloud.com');
-    $_ENV['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
-    $_SERVER['DB_HOST'] = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
+    $dbHost = 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
+    putenv("DB_HOST={$dbHost}");
+    $_ENV['DB_HOST'] = $dbHost;
+    $_SERVER['DB_HOST'] = $dbHost;
 }
+
 $dbPort = getenv('DB_PORT');
 if (empty($dbPort) || $dbPort == '3306') {
-    putenv('DB_PORT=4000');
-    $_ENV['DB_PORT'] = '4000';
-    $_SERVER['DB_PORT'] = '4000';
+    $dbPort = '4000';
+    putenv("DB_PORT={$dbPort}");
+    $_ENV['DB_PORT'] = $dbPort;
+    $_SERVER['DB_PORT'] = $dbPort;
 }
+
 $dbName = getenv('DB_DATABASE');
 if (empty($dbName) || in_array($dbName, ['laravel', 'sys'])) {
-    putenv('DB_DATABASE=qr_social');
-    $_ENV['DB_DATABASE'] = 'qr_social';
-    $_SERVER['DB_DATABASE'] = 'qr_social';
+    $dbName = 'qr_social';
+    putenv("DB_DATABASE={$dbName}");
+    $_ENV['DB_DATABASE'] = $dbName;
+    $_SERVER['DB_DATABASE'] = $dbName;
 }
+
 $dbUser = getenv('DB_USERNAME');
 if (empty($dbUser) || $dbUser == 'root') {
-    putenv('DB_USERNAME=9DnYhSCY9Rj7SGv.root');
-    $_ENV['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
-    $_SERVER['DB_USERNAME'] = '9DnYhSCY9Rj7SGv.root';
+    $dbUser = '9DnYhSCY9Rj7SGv.root';
+    putenv("DB_USERNAME={$dbUser}");
+    $_ENV['DB_USERNAME'] = $dbUser;
+    $_SERVER['DB_USERNAME'] = $dbUser;
 }
 
-putenv('DB_CONNECTION=mysql');
-$_ENV['DB_CONNECTION'] = 'mysql';
-$_SERVER['DB_CONNECTION'] = 'mysql';
+$dbPassword = getenv('DB_PASSWORD');
+if (empty($dbPassword)) {
+    $dbPassword = '2bPMSb9cN7pkmpoO';
+    putenv("DB_PASSWORD={$dbPassword}");
+    $_ENV['DB_PASSWORD'] = $dbPassword;
+    $_SERVER['DB_PASSWORD'] = $dbPassword;
+}
 
-putenv('SESSION_DRIVER=file');
-$_ENV['SESSION_DRIVER'] = 'file';
-$_SERVER['SESSION_DRIVER'] = 'file';
+// Fast preflight connection check to TiDB Cloud MySQL
+$useMysql = false;
+if (extension_loaded('pdo_mysql')) {
+    try {
+        $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName}";
+        $opts = [
+            PDO::ATTR_TIMEOUT => 2,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        ];
+        $sslCa = getenv('MYSQL_ATTR_SSL_CA');
+        if ($sslCa && file_exists($sslCa)) {
+            $opts[PDO::MYSQL_ATTR_SSL_CA] = $sslCa;
+            $opts[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+        $pdoTest = new PDO($dsn, $dbUser, $dbPassword, $opts);
+        $useMysql = true;
+    } catch (\Throwable $e) {
+        error_log("TiDB Cloud connection failed: " . $e->getMessage() . ". Falling back to SQLite.");
+        $useMysql = false;
+    }
+}
 
-putenv('CACHE_STORE=file');
-$_ENV['CACHE_STORE'] = 'file';
-$_SERVER['CACHE_STORE'] = 'file';
+if ($useMysql) {
+    putenv('DB_CONNECTION=mysql');
+    $_ENV['DB_CONNECTION'] = 'mysql';
+    $_SERVER['DB_CONNECTION'] = 'mysql';
 
-// 9. Forward to public/index.php
+    putenv('SESSION_DRIVER=file');
+    $_ENV['SESSION_DRIVER'] = 'file';
+    $_SERVER['SESSION_DRIVER'] = 'file';
+
+    putenv('CACHE_STORE=file');
+    $_ENV['CACHE_STORE'] = 'file';
+    $_SERVER['CACHE_STORE'] = 'file';
+} else {
+    // If TiDB Cloud is unreachable, seamlessly fall back to SQLite database
+    putenv('DB_CONNECTION=sqlite');
+    $_ENV['DB_CONNECTION'] = 'sqlite';
+    $_SERVER['DB_CONNECTION'] = 'sqlite';
+
+    putenv('SESSION_DRIVER=file');
+    $_ENV['SESSION_DRIVER'] = 'file';
+    $_SERVER['SESSION_DRIVER'] = 'file';
+
+    putenv('CACHE_STORE=file');
+    $_ENV['CACHE_STORE'] = 'file';
+    $_SERVER['CACHE_STORE'] = 'file';
+
+    $dbCandidates = [
+        $baseDir . '/database/database.sqlite',
+        dirname(__DIR__) . '/database/database.sqlite',
+        '/var/task/user/database/database.sqlite',
+        '/var/task/database/database.sqlite',
+    ];
+    $bundledDb = null;
+    foreach ($dbCandidates as $dbPath) {
+        if (file_exists($dbPath) && is_file($dbPath) && filesize($dbPath) > 0) {
+            $bundledDb = $dbPath;
+            break;
+        }
+    }
+
+    $tmpDb = '/tmp/database.sqlite';
+    if (!file_exists($tmpDb) || filesize($tmpDb) === 0) {
+        if ($bundledDb && file_exists($bundledDb) && filesize($bundledDb) > 0) {
+            @copy($bundledDb, $tmpDb);
+        } else {
+            @touch($tmpDb);
+        }
+    }
+    if (file_exists($tmpDb)) {
+        @chmod($tmpDb, 0666);
+    }
+    putenv("DB_DATABASE={$tmpDb}");
+    $_ENV['DB_DATABASE'] = $tmpDb;
+    $_SERVER['DB_DATABASE'] = $tmpDb;
+}
+
+// 9. Forward to public/index.php with diagnostic error handling
 $publicIndexCandidates = [
     $baseDir . '/public/index.php',
     dirname(__DIR__) . '/public/index.php',
     '/var/task/user/public/index.php',
     '/var/task/public/index.php',
 ];
+
+$chosenIndex = null;
 foreach ($publicIndexCandidates as $indexPath) {
     if (file_exists($indexPath) && is_file($indexPath)) {
-        require $indexPath;
-        exit;
+        $chosenIndex = $indexPath;
+        break;
     }
 }
-require dirname(__DIR__) . '/public/index.php';
+if (!$chosenIndex) {
+    $chosenIndex = dirname(__DIR__) . '/public/index.php';
+}
+
+try {
+    require $chosenIndex;
+} catch (\Throwable $e) {
+    error_log("Unhandled Application Exception: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
+    echo "<!DOCTYPE html><html><head><title>500 Internal Server Error</title>";
+    echo "<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:30px;background:#f8fafc;color:#0f172a;}pre{background:#1e293b;color:#f8fafc;padding:16px;border-radius:12px;overflow-x:auto;font-size:13px;line-height:1.5;}</style></head><body>";
+    echo "<h2 style='color:#e11d48;'>500 - Application Initialization Error</h2>";
+    echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p><strong>Location:</strong> " . htmlspecialchars($e->getFile()) . " (line " . $e->getLine() . ")</p>";
+    echo "<h3>Stack Trace</h3>";
+    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    echo "</body></html>";
+    exit;
+}
 
