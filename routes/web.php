@@ -262,3 +262,38 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });
 
+/*
+|--------------------------------------------------------------------------
+| 5. Static Assets Direct Routes (Ensures JS/CSS never 404 on Vercel)
+|--------------------------------------------------------------------------
+*/
+Route::get('/js/{file}', function ($file) {
+    $path = public_path('js/' . $file);
+    if (file_exists($path) && is_file($path)) {
+        return response()->file($path, [
+            'Content-Type' => 'application/javascript; charset=utf-8',
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    }
+    abort(404);
+})->where('file', '.*');
+
+Route::get('/build/{path}', function ($path) {
+    $filePath = public_path('build/' . $path);
+    if (file_exists($filePath) && is_file($filePath)) {
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $mimes = [
+            'css' => 'text/css; charset=utf-8',
+            'js' => 'application/javascript; charset=utf-8',
+            'json' => 'application/json',
+        ];
+        $mime = $mimes[$ext] ?? 'application/octet-stream';
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    }
+    abort(404);
+})->where('path', '.*');
+
+
