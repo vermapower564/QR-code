@@ -38,6 +38,7 @@ use App\Http\Controllers\WebhookController;
 | 1. Public Website Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/test-deploy', fn() => response('DEPLOY_OK_123', 200));
 Route::get('/', [PublicProfileController::class, 'home'])->name('home');
 Route::get('/qr/download-instant', [PublicProfileController::class, 'downloadInstantQr'])->name('qr.download.instant');
 Route::get('/features', [PageController::class, 'features'])->name('features');
